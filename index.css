@@ -1,0 +1,412 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Geist+Mono:wght@300;400;500;600;700;800&display=swap');
+
+@theme {
+  --color-brand-50:  #f0fdf4;
+  --color-brand-500: #22c55e;
+  --color-brand-950: #052e16;
+
+  /* ── Custom Theme Tokens ── */
+  --color-background:    var(--background);
+  --color-surface:       var(--surface);
+  --color-card:          var(--card);
+  --color-primary:       var(--primary);
+  --color-accent:        var(--accent);
+  --color-purple:        var(--purple);
+  --color-foreground:    var(--foreground);
+  --color-muted:         var(--muted);
+  --color-border:        var(--border);
+
+  --font-sans: 'Share Tech Mono', 'Geist Mono', 'Courier New', monospace;
+  --font-mono: 'Geist Mono', 'Courier New', monospace;
+}
+
+/* ── Lock Viewport Bounds ── */
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #030712;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-y: auto;
+}
+
+/* Lock viewport bounds on desktop ONLY when workspace dashboard is active */
+@media (min-width: 1024px) {
+  html.app-locked, body.app-locked {
+    height: 100% !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    position: fixed !important;
+    top: 0;
+    left: 0;
+  }
+}
+
+/* ── Cyberpunk CSS Variables ── */
+:root {
+  --background:    #030712;
+  --surface:       #0b0f19;
+  --card:          rgba(11, 15, 25, 0.85);
+  --primary:       #00ff66; /* Laser Green */
+  --accent:        #00ffff; /* Cyber Cyan */
+  --purple:        #ff00ff; /* Neon Fuchsia */
+  --foreground:    #ffffff;
+  --muted:         #64748b;
+  --border:        #00ff66;
+}
+
+.dark {
+  --background:    #020617;
+  --surface:       #0b0f19;
+  --card:          rgba(11, 15, 25, 0.85);
+  --primary:       #00ff66;
+  --accent:        #00ffff;
+  --purple:        #ff00ff;
+  --foreground:    #ffffff;
+  --muted:         #64748b;
+  --border:        #00ff66;
+}
+
+/* ── Scrollbars ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.3); }
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  box-shadow: 0 0 8px var(--primary);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* Custom themed scrollbars to match panel systems */
+.scrollbar-red::-webkit-scrollbar-thumb {
+  background: #ef4444 !important;
+  box-shadow: 0 0 8px #ef4444 !important;
+}
+.scrollbar-red::-webkit-scrollbar-thumb:hover {
+  background: #f87171 !important;
+}
+
+.scrollbar-cyan::-webkit-scrollbar-thumb {
+  background: var(--accent) !important;
+  box-shadow: 0 0 8px var(--accent) !important;
+}
+.scrollbar-cyan::-webkit-scrollbar-thumb:hover {
+  background: var(--primary) !important;
+}
+
+.scrollbar-pink::-webkit-scrollbar-thumb {
+  background: var(--purple) !important;
+  box-shadow: 0 0 8px var(--purple) !important;
+}
+.scrollbar-pink::-webkit-scrollbar-thumb:hover {
+  background: #ff66ff !important;
+}
+
+
+/* ── Cyber Terminal Layouts ── */
+.app-shell-grid {
+  display: grid;
+  grid-template-rows: 64px minmax(0, 1fr);
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+}
+
+.workspace-layout-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+  height: 100%;
+  overflow: hidden;
+}
+
+.workspace-stage-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+  gap: 1.5rem;
+  height: 100%;
+  overflow-y: auto;
+}
+
+@media (max-width: 1024px) {
+  .app-shell-grid {
+    height: auto;
+    overflow-y: auto;
+  }
+  .workspace-layout-grid {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow-y: visible;
+  }
+  .workspace-stage-grid {
+    height: auto;
+    overflow-y: visible;
+  }
+}
+
+@media (max-width: 768px) {
+  .workspace-stage-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    height: auto;
+    overflow-y: visible;
+  }
+}
+
+/* ── Cyberpunk Matrix Grid & Scanline Background ── */
+.cyber-container {
+  position: relative;
+  background-color: var(--background);
+  background-image: 
+    linear-gradient(rgba(0, 255, 102, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 102, 0.05) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+.cyber-scanlines {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  );
+  background-size: 100% 4px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.cyber-scanlines::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 0%, rgba(0, 255, 102, 0.08) 10%, rgba(18, 16, 16, 0) 20%);
+  animation: scanline 8s linear infinite;
+  z-index: 10;
+  pointer-events: none;
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+/* ── Cyberpunk HUD Terminal Widgets ── */
+.cyber-terminal {
+  background: var(--card);
+  border: 1px solid var(--primary);
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.2), inset 0 0 15px rgba(0, 255, 102, 0.05);
+  position: relative;
+  border-radius: 4px;
+}
+
+.cyber-terminal::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid var(--primary);
+  border-left: 2px solid var(--primary);
+}
+
+.cyber-terminal::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-bottom: 2px solid var(--primary);
+  border-right: 2px solid var(--primary);
+}
+
+.cyber-terminal-cyan {
+  background: var(--card);
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2), inset 0 0 15px rgba(0, 255, 255, 0.05);
+  position: relative;
+  border-radius: 4px;
+}
+
+.cyber-terminal-cyan::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid var(--accent);
+  border-left: 2px solid var(--accent);
+}
+
+.cyber-terminal-cyan::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-bottom: 2px solid var(--accent);
+  border-right: 2px solid var(--accent);
+}
+
+.cyber-terminal-pink {
+  background: var(--card);
+  border: 1px solid var(--purple);
+  box-shadow: 0 0 10px rgba(255, 0, 255, 0.2), inset 0 0 15px rgba(255, 0, 255, 0.05);
+  position: relative;
+  border-radius: 4px;
+}
+
+.cyber-terminal-pink::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid var(--purple);
+  border-left: 2px solid var(--purple);
+}
+
+.cyber-terminal-pink::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-bottom: 2px solid var(--purple);
+  border-right: 2px solid var(--purple);
+}
+
+/* ── Glowing & Glitch Text ── */
+.cyber-glow-green {
+  text-shadow: 0 0 8px var(--primary);
+}
+.cyber-glow-cyan {
+  text-shadow: 0 0 8px var(--accent);
+}
+.cyber-glow-pink {
+  text-shadow: 0 0 8px var(--purple);
+}
+
+/* ── Cyberpunk Laser Button ── */
+.cyber-button {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  text-shadow: 0 0 5px var(--primary);
+  box-shadow: 0 0 5px rgba(0, 255, 102, 0.15);
+  font-weight: 700;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.cyber-button:hover {
+  background: var(--primary);
+  color: #030712;
+  box-shadow: 0 0 15px var(--primary);
+  text-shadow: none;
+}
+
+.cyber-button-cyan {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  text-shadow: 0 0 5px var(--accent);
+  box-shadow: 0 0 5px rgba(0, 255, 255, 0.15);
+  font-weight: 700;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.cyber-button-cyan:hover {
+  background: var(--accent);
+  color: #030712;
+  box-shadow: 0 0 15px var(--accent);
+  text-shadow: none;
+}
+
+.cyber-button-pink {
+  background: transparent;
+  color: var(--purple);
+  border: 1px solid var(--purple);
+  text-shadow: 0 0 5px var(--purple);
+  box-shadow: 0 0 5px rgba(255, 0, 255, 0.15);
+  font-weight: 700;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.cyber-button-pink:hover {
+  background: var(--purple);
+  color: #030712;
+  box-shadow: 0 0 15px var(--purple);
+  text-shadow: none;
+}
+
+/* ── Container Queries ── */
+.container-query-parent {
+  container-type: inline-size;
+}
+@container (max-width: 420px) {
+  .responsive-card {
+    padding: 1rem !important;
+  }
+  .responsive-text {
+    font-size: 0.95rem !important;
+    line-height: 1.4 !important;
+  }
+}
+
+/* ── Cyberpunk Glitch Visual FX ── */
+.glitch-text {
+  position: relative;
+}
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--background);
+}
+.glitch-text::before {
+  left: 2px;
+  text-shadow: -1px 0 #ff00ff;
+  clip: rect(44px, 450px, 56px, 0);
+  animation: glitch-anim 5s infinite linear alternate-reverse;
+}
+.glitch-text::after {
+  left: -2px;
+  text-shadow: -1px 0 #00ffff, 0 1px #00ffff;
+  clip: rect(85px, 450px, 140px, 0);
+  animation: glitch-anim2 5s infinite linear alternate-reverse;
+}
+@keyframes glitch-anim {
+  0% { clip: rect(15px, 9999px, 66px, 0); }
+  100% { clip: rect(34px, 9999px, 55px, 0); }
+}
+@keyframes glitch-anim2 {
+  0% { clip: rect(70px, 9999px, 105px, 0); }
+  100% { clip: rect(12px, 9999px, 85px, 0); }
+}

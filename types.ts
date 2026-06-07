@@ -8,11 +8,24 @@ export enum SentimentLabel {
 export interface SentimentResult {
   sentiment: SentimentLabel;
   explanation: string;
+  intensity: number;          // 0.0 to 1.0 scale
+  emotionalInsights: string[]; // e.g. ["Excited", "Anxious", "Calm"]
+  tone: string;               // e.g. "Professional", "Informal"
+  confidence: number;         // Sentiment AI confidence score
 }
 
 export interface Language {
   code: string;
   name: string;
+}
+
+export interface TranslationResult {
+  translatedText: string;
+  detectedLanguageName?: string;
+  detectedLanguageCode?: string;
+  languageConfidence?: number;  // 0.0 to 1.0 scale
+  qualityScore?: number;        // Translation quality score (0.0 to 1.0)
+  clarityScore?: number;        // Readability/Clarity score (0.0 to 1.0)
 }
 
 export interface HistoryItem {
@@ -23,4 +36,9 @@ export interface HistoryItem {
   targetLanguage: string;
   targetLanguageName: string;
   timestamp: number;
+  languageConfidence?: number;
+  qualityScore?: number;
+  clarityScore?: number;
+  detectedLanguageName?: string;
 }
+

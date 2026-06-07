@@ -1,6 +1,6 @@
 {
   "name": "VELTRIO",
-  "description": "A cutting-edge web application combining real-time translation, sentiment analysis, and live AI voice conversations using Google Gemini 2.5. Features include speech-to-text, text-to-speech, and low-latency audio streaming.",
+  "description": "A cutting-edge web application combining real-time translation, sentiment analysis, and conversational AI using Hugging Face models. Features include speech-to-text, text-to-speech, and local audio recording.",
   "requestFramePermissions": [
     "microphone"
   ]
