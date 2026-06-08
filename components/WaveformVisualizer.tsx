@@ -62,7 +62,7 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({ isActive, mode,
       ctx.clearRect(0, 0, width, height);
 
       // Draw digital oscilloscope background grid
-      ctx.strokeStyle = 'rgba(0, 255, 102, 0.08)';
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.06)';
       ctx.lineWidth = 1;
       
       // Horizontal grids
@@ -82,21 +82,21 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({ isActive, mode,
       }
 
       // Midline reference
-      ctx.strokeStyle = 'rgba(0, 255, 102, 0.15)';
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.15)';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(0, height / 2);
       ctx.lineTo(width, height / 2);
       ctx.stroke();
 
-      const baseColor = '#00ff66';
-      const accentColor = '#00ffff';
-      const purpleColor = '#ff00ff';
+      const baseColor = '#4f46e5';   // Indigo
+      const accentColor = '#2563eb'; // Blue
+      const greenColor = '#10b981';  // Emerald
 
       const gradient = ctx.createLinearGradient(0, 0, width, 0);
       gradient.addColorStop(0, baseColor);
       gradient.addColorStop(0.5, accentColor);
-      gradient.addColorStop(1, purpleColor);
+      gradient.addColorStop(1, greenColor);
 
       if (mode === 'recording' && analyserRef.current) {
         // Real-time audio waveform from microphone
@@ -108,7 +108,7 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({ isActive, mode,
         ctx.lineWidth = 3 * window.devicePixelRatio;
         ctx.strokeStyle = gradient;
         ctx.lineCap = 'round';
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = 6;
         ctx.shadowColor = baseColor;
         ctx.beginPath();
 
@@ -147,7 +147,7 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({ isActive, mode,
           ctx.lineWidth = (3.5 - l * 0.7) * window.devicePixelRatio;
           ctx.strokeStyle = l === 0 ? gradient : `${accentColor}${Math.floor(255 / (l + 1.3)).toString(16).padStart(2, 'f')}`;
           ctx.lineCap = 'round';
-          ctx.shadowBlur = l === 0 ? 8 : 0;
+          ctx.shadowBlur = l === 0 ? 5 : 0;
           ctx.shadowColor = accentColor;
 
           for (let x = 0; x < width; x += 4) {
@@ -169,13 +169,11 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({ isActive, mode,
         // Idle flat baseline
         ctx.beginPath();
         ctx.lineWidth = 1.5 * window.devicePixelRatio;
-        ctx.strokeStyle = 'rgba(0, 255, 102, 0.4)';
-        ctx.shadowBlur = 4;
-        ctx.shadowColor = baseColor;
+        ctx.strokeStyle = 'rgba(79, 70, 229, 0.25)';
+        ctx.shadowBlur = 0;
         ctx.moveTo(0, height / 2);
         ctx.lineTo(width, height / 2);
         ctx.stroke();
-        ctx.shadowBlur = 0;
       }
 
       animationRef.current = requestAnimationFrame(render);
@@ -190,7 +188,7 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({ isActive, mode,
   }, [isActive, mode]);
 
   return (
-    <div className="w-full h-24 relative bg-black/40 border border-primary/20 overflow-hidden flex items-center justify-center">
+    <div className="w-full h-24 relative bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex items-center justify-center">
       <canvas ref={canvasRef} className="w-full h-full block" />
     </div>
   );

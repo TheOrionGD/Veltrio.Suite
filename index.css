@@ -1,31 +1,34 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Geist+Mono:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@300;400;500;600;700&display=swap');
 
 @theme {
-  --color-brand-50:  #f0fdf4;
-  --color-brand-500: #22c55e;
-  --color-brand-950: #052e16;
+  --color-brand-50: #f5f3ff;
+  --color-brand-500: #4f46e5;
+  --color-brand-950: #1e1b4b;
 
   /* ── Custom Theme Tokens ── */
-  --color-background:    var(--background);
-  --color-surface:       var(--surface);
-  --color-card:          var(--card);
-  --color-primary:       var(--primary);
-  --color-accent:        var(--accent);
-  --color-purple:        var(--purple);
-  --color-foreground:    var(--foreground);
-  --color-muted:         var(--muted);
-  --color-border:        var(--border);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+  --color-purple: var(--purple);
+  --color-amber: var(--amber);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
 
-  --font-sans: 'Share Tech Mono', 'Geist Mono', 'Courier New', monospace;
+  --font-sans: 'Inter', 'Outfit', system-ui, -apple-system, sans-serif;
   --font-mono: 'Geist Mono', 'Courier New', monospace;
 }
 
 /* ── Lock Viewport Bounds ── */
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
-  background-color: #030712;
+  background-color: #ffffff;
+  color: #0f172a;
 }
 
 html {
@@ -33,380 +36,257 @@ html {
   overflow-y: auto;
 }
 
-/* Lock viewport bounds on desktop ONLY when workspace dashboard is active */
-@media (min-width: 1024px) {
-  html.app-locked, body.app-locked {
-    height: 100% !important;
-    width: 100% !important;
-    overflow: hidden !important;
-    position: fixed !important;
-    top: 0;
-    left: 0;
-  }
-}
 
-/* ── Cyberpunk CSS Variables ── */
+
+/* ── Professional SaaS CSS Variables ── */
 :root {
-  --background:    #030712;
-  --surface:       #0b0f19;
-  --card:          rgba(11, 15, 25, 0.85);
-  --primary:       #00ff66; /* Laser Green */
-  --accent:        #00ffff; /* Cyber Cyan */
-  --purple:        #ff00ff; /* Neon Fuchsia */
-  --foreground:    #ffffff;
-  --muted:         #64748b;
-  --border:        #00ff66;
+  --background: #ffffff;
+  --surface: #f8fafc; /* Slate 50 */
+  --card: #ffffff;
+  --primary: #4f46e5;      /* Team / Brand Indigo */
+  --accent: #2563eb;       /* Industrialized Cobalt Blue */
+  --purple: #10b981;       /* Native Emerald Green */
+  --amber: #f59e0b;        /* Customer Satisfaction Orange-Amber */
+  --foreground: #0f172a;   /* Slate 900 */
+  --muted: #64748b;        /* Slate 500 */
+  --border: #e2e8f0;       /* Slate 200 */
 }
 
+/* Force light theme values even if dark class is toggled or configured */
 .dark {
-  --background:    #020617;
-  --surface:       #0b0f19;
-  --card:          rgba(11, 15, 25, 0.85);
-  --primary:       #00ff66;
-  --accent:        #00ffff;
-  --purple:        #ff00ff;
-  --foreground:    #ffffff;
-  --muted:         #64748b;
-  --border:        #00ff66;
+  --background: #ffffff;
+  --surface: #f8fafc;
+  --card: #ffffff;
+  --primary: #4f46e5;
+  --accent: #2563eb;
+  --purple: #10b981;
+  --amber: #f59e0b;
+  --foreground: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
 }
 
 /* ── Scrollbars ── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.3); }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
 ::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  box-shadow: 0 0 8px var(--primary);
-}
-::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-/* Custom themed scrollbars to match panel systems */
-.scrollbar-red::-webkit-scrollbar-thumb {
-  background: #ef4444 !important;
-  box-shadow: 0 0 8px #ef4444 !important;
-}
-.scrollbar-red::-webkit-scrollbar-thumb:hover {
-  background: #f87171 !important;
+  background: #cbd5e1;
+  border-radius: 4px;
 }
 
-.scrollbar-cyan::-webkit-scrollbar-thumb {
-  background: var(--accent) !important;
-  box-shadow: 0 0 8px var(--accent) !important;
-}
-.scrollbar-cyan::-webkit-scrollbar-thumb:hover {
-  background: var(--primary) !important;
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
+/* Scrollbar fallbacks for special panels */
+.scrollbar-red::-webkit-scrollbar-thumb,
+.scrollbar-cyan::-webkit-scrollbar-thumb,
 .scrollbar-pink::-webkit-scrollbar-thumb {
-  background: var(--purple) !important;
-  box-shadow: 0 0 8px var(--purple) !important;
+  background: #cbd5e1 !important;
+  box-shadow: none !important;
 }
+
+.scrollbar-red::-webkit-scrollbar-thumb:hover,
+.scrollbar-cyan::-webkit-scrollbar-thumb:hover,
 .scrollbar-pink::-webkit-scrollbar-thumb:hover {
-  background: #ff66ff !important;
+  background: #94a3b8 !important;
 }
 
-
-/* ── Cyber Terminal Layouts ── */
+/* ── Layout Shell ── */
 .app-shell-grid {
-  display: grid;
-  grid-template-rows: 64px minmax(0, 1fr);
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
   position: relative;
-}
-
-.workspace-layout-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
-  height: 100%;
-  overflow: hidden;
+  background-color: var(--surface);
 }
 
 .workspace-stage-grid {
   display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+  grid-template-columns: repeat(10, minmax(0, 1fr));
   gap: 1.5rem;
-  height: 100%;
-  overflow-y: auto;
+  width: 100%;
 }
 
 @media (max-width: 1024px) {
-  .app-shell-grid {
-    height: auto;
-    overflow-y: auto;
-  }
-  .workspace-layout-grid {
-    grid-template-columns: 1fr;
-    height: auto;
-    overflow-y: visible;
-  }
   .workspace-stage-grid {
-    height: auto;
-    overflow-y: visible;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 }
 
-@media (max-width: 768px) {
-  .workspace-stage-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    height: auto;
-    overflow-y: visible;
-  }
-}
-
-/* ── Cyberpunk Matrix Grid & Scanline Background ── */
+/* ── SaaS Backgrounds ── */
 .cyber-container {
   position: relative;
-  background-color: var(--background);
-  background-image: 
-    linear-gradient(rgba(0, 255, 102, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 102, 0.05) 1px, transparent 1px);
-  background-size: 30px 30px;
+  background-color: var(--surface);
+  background-image: radial-gradient(#cbd5e1 0.75px, transparent 0.75px);
+  background-size: 20px 20px;
 }
 
+/* Remove scanline aesthetics entirely */
 .cyber-scanlines {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: linear-gradient(
-    rgba(18, 16, 16, 0) 50%, 
-    rgba(0, 0, 0, 0.25) 50%
-  );
-  background-size: 100% 4px;
-  z-index: 10;
-  pointer-events: none;
+  display: none !important;
 }
 
-.cyber-scanlines::after {
-  content: " ";
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 0%, rgba(0, 255, 102, 0.08) 10%, rgba(18, 16, 16, 0) 20%);
-  animation: scanline 8s linear infinite;
-  z-index: 10;
-  pointer-events: none;
-}
-
-@keyframes scanline {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
-}
-
-/* ── Cyberpunk HUD Terminal Widgets ── */
-.cyber-terminal {
-  background: var(--card);
-  border: 1px solid var(--primary);
-  box-shadow: 0 0 10px rgba(0, 255, 102, 0.2), inset 0 0 15px rgba(0, 255, 102, 0.05);
-  position: relative;
-  border-radius: 4px;
-}
-
-.cyber-terminal::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 10px;
-  height: 10px;
-  border-top: 2px solid var(--primary);
-  border-left: 2px solid var(--primary);
-}
-
-.cyber-terminal::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 10px;
-  height: 10px;
-  border-bottom: 2px solid var(--primary);
-  border-right: 2px solid var(--primary);
-}
-
-.cyber-terminal-cyan {
-  background: var(--card);
-  border: 1px solid var(--accent);
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2), inset 0 0 15px rgba(0, 255, 255, 0.05);
-  position: relative;
-  border-radius: 4px;
-}
-
-.cyber-terminal-cyan::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 10px;
-  height: 10px;
-  border-top: 2px solid var(--accent);
-  border-left: 2px solid var(--accent);
-}
-
-.cyber-terminal-cyan::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 10px;
-  height: 10px;
-  border-bottom: 2px solid var(--accent);
-  border-right: 2px solid var(--accent);
-}
-
+/* ── Modern SaaS Cards (Replacing HUD Terminals) ── */
+.cyber-terminal,
+.cyber-terminal-cyan,
 .cyber-terminal-pink {
   background: var(--card);
-  border: 1px solid var(--purple);
-  box-shadow: 0 0 10px rgba(255, 0, 255, 0.2), inset 0 0 15px rgba(255, 0, 255, 0.05);
-  position: relative;
-  border-radius: 4px;
-}
-
-.cyber-terminal-pink::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 10px;
-  height: 10px;
-  border-top: 2px solid var(--purple);
-  border-left: 2px solid var(--purple);
-}
-
-.cyber-terminal-pink::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 10px;
-  height: 10px;
-  border-bottom: 2px solid var(--purple);
-  border-right: 2px solid var(--purple);
-}
-
-/* ── Glowing & Glitch Text ── */
-.cyber-glow-green {
-  text-shadow: 0 0 8px var(--primary);
-}
-.cyber-glow-cyan {
-  text-shadow: 0 0 8px var(--accent);
-}
-.cyber-glow-pink {
-  text-shadow: 0 0 8px var(--purple);
-}
-
-/* ── Cyberpunk Laser Button ── */
-.cyber-button {
-  background: transparent;
-  color: var(--primary);
-  border: 1px solid var(--primary);
-  text-shadow: 0 0 5px var(--primary);
-  box-shadow: 0 0 5px rgba(0, 255, 102, 0.15);
-  font-weight: 700;
-  transition: all 0.2s ease;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
   position: relative;
   overflow: hidden;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Disable corner absolute elements */
+.cyber-terminal::before,
+.cyber-terminal::after,
+.cyber-terminal-cyan::before,
+.cyber-terminal-cyan::after,
+.cyber-terminal-pink::before,
+.cyber-terminal-pink::after {
+  display: none !important;
+}
+
+/* ── Text shadows disabled ── */
+.cyber-glow-green,
+.cyber-glow-cyan,
+.cyber-glow-pink {
+  text-shadow: none !important;
+}
+
+/* ── Modern SaaS Buttons ── */
+.cyber-button {
+  background: var(--primary);
+  color: #ffffff !important;
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
   cursor: pointer;
+  box-shadow: 0 1px 2px 0 rgba(79, 70, 229, 0.05);
+  text-shadow: none !important;
 }
 
 .cyber-button:hover {
-  background: var(--primary);
-  color: #030712;
-  box-shadow: 0 0 15px var(--primary);
-  text-shadow: none;
+  background: #4338ca; /* Indigo-700 */
+  border-color: #4338ca;
+  color: #ffffff !important;
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1);
 }
 
 .cyber-button-cyan {
-  background: transparent;
-  color: var(--accent);
+  background: var(--accent);
+  color: #ffffff !important;
   border: 1px solid var(--accent);
-  text-shadow: 0 0 5px var(--accent);
-  box-shadow: 0 0 5px rgba(0, 255, 255, 0.15);
-  font-weight: 700;
+  border-radius: 8px;
+  font-weight: 600;
   transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
   cursor: pointer;
+  box-shadow: 0 1px 2px 0 rgba(37, 99, 235, 0.05);
+  text-shadow: none !important;
 }
 
 .cyber-button-cyan:hover {
-  background: var(--accent);
-  color: #030712;
-  box-shadow: 0 0 15px var(--accent);
-  text-shadow: none;
+  background: #1d4ed8; /* Blue-700 */
+  border-color: #1d4ed8;
+  color: #ffffff !important;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1);
 }
 
 .cyber-button-pink {
-  background: transparent;
-  color: var(--purple);
+  background: var(--purple);
+  color: #ffffff !important;
   border: 1px solid var(--purple);
-  text-shadow: 0 0 5px var(--purple);
-  box-shadow: 0 0 5px rgba(255, 0, 255, 0.15);
-  font-weight: 700;
+  border-radius: 8px;
+  font-weight: 600;
   transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
   cursor: pointer;
+  box-shadow: 0 1px 2px 0 rgba(16, 185, 129, 0.05);
+  text-shadow: none !important;
 }
 
 .cyber-button-pink:hover {
-  background: var(--purple);
-  color: #030712;
-  box-shadow: 0 0 15px var(--purple);
-  text-shadow: none;
+  background: #059669; /* Emerald-600 */
+  border-color: #059669;
+  color: #ffffff !important;
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1);
 }
 
 /* ── Container Queries ── */
 .container-query-parent {
   container-type: inline-size;
 }
+
 @container (max-width: 420px) {
   .responsive-card {
     padding: 1rem !important;
   }
+
   .responsive-text {
     font-size: 0.95rem !important;
     line-height: 1.4 !important;
   }
 }
 
-/* ── Cyberpunk Glitch Visual FX ── */
+/* Disable glitch effects */
 .glitch-text {
   position: relative;
 }
+
 .glitch-text::before,
 .glitch-text::after {
-  content: attr(data-text);
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--background);
+  display: none !important;
 }
-.glitch-text::before {
-  left: 2px;
-  text-shadow: -1px 0 #ff00ff;
-  clip: rect(44px, 450px, 56px, 0);
-  animation: glitch-anim 5s infinite linear alternate-reverse;
+
+/* ── Premium Luxury Scrollytelling Styles ── */
+.text-outline-luxury {
+  -webkit-text-stroke: 2px rgba(15, 23, 42, 0.04);
+  color: transparent;
+  text-transform: uppercase;
 }
-.glitch-text::after {
-  left: -2px;
-  text-shadow: -1px 0 #00ffff, 0 1px #00ffff;
-  clip: rect(85px, 450px, 140px, 0);
-  animation: glitch-anim2 5s infinite linear alternate-reverse;
+
+.molten-border {
+  border-image: linear-gradient(135deg, rgba(245, 158, 11, 0.3) 0%, rgba(245, 158, 11, 0) 50%, rgba(249, 115, 22, 0.3) 100%) 1;
 }
-@keyframes glitch-anim {
-  0% { clip: rect(15px, 9999px, 66px, 0); }
-  100% { clip: rect(34px, 9999px, 55px, 0); }
+
+.molten-glow-orange {
+  background: radial-gradient(circle at center, rgba(245, 158, 11, 0.08) 0%, rgba(245, 158, 11, 0) 70%);
 }
-@keyframes glitch-anim2 {
-  0% { clip: rect(70px, 9999px, 105px, 0); }
-  100% { clip: rect(12px, 9999px, 85px, 0); }
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(4deg);
+  }
+}
+
+@keyframes float-reverse {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(15px) rotate(-4deg);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 7s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 8s ease-in-out infinite;
 }

@@ -42,8 +42,8 @@ export const chatWithGroq = async (messages: ChatMessage[]): Promise<string> => 
 Your goal is to help users with:
 - Language translation and phrasing tips.
 - Language learning questions, culture, and idioms.
-- Explaining how to use Veltrio (which features a Translator tab for text/voice translation with sentiment analysis and a Live Conversation tab for interactive voice chat).
-Keep your responses extremely short, concise, and clear (maximum 1-2 sentences or bullet points). Think of it as a terminal log style. Do not mention any prohibited terms like "Enterprise" or "Cybersecurity" or "Gemini" or "Google".`
+- Explaining how to use Veltrio (which features a Translator Dashboard for text/voice translation with sentiment analysis and a Live Voice Mode for interactive voice chat).
+Keep your responses extremely short, concise, and clear (maximum 1-2 sentences or bullet points). Think of it as a professional assistant style. Do not mention any prohibited terms like "Enterprise" or "Cybersecurity" or "Gemini" or "Google".`
   };
 
   // Combine instructions with conversation history
@@ -72,7 +72,12 @@ Keep your responses extremely short, concise, and clear (maximum 1-2 sentences o
   return data.choices?.[0]?.message?.content || "";
 };
 
-export const translateTextGroq = async (text: string, srcLang: string, tgtLang: string): Promise<TranslationResult> => {
+export const translateTextGroq = async (
+  text: string, 
+  srcLang: string, 
+  tgtLang: string, 
+  styleInstruction?: string
+): Promise<TranslationResult> => {
   if (!text.trim()) return { translatedText: '' };
   const apiKey = getGroqApiKey();
   const srcName = srcLang === 'auto' ? 'Auto-Detect' : (LANG_NAME_MAP[srcLang] || srcLang);
@@ -90,6 +95,7 @@ export const translateTextGroq = async (text: string, srcLang: string, tgtLang: 
         {
           role: 'system',
           content: `You are a professional translator and linguist. Translate the text from ${srcName} to ${tgtName}.
+${styleInstruction || ''}
 If the source language is "Auto-Detect", identify the source language first.
 Assess the quality and readability of the translation.
 You must respond with a JSON object containing these exact fields:

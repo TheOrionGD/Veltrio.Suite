@@ -3,6 +3,7 @@ import { translateTextGroq, analyzeSentimentGroq, transcribeAudioGroq, generateS
 import { SentimentResult, Language, HistoryItem, SentimentLabel } from '../types';
 import { LANGUAGES } from '../constants';
 import SentimentDisplay from './SentimentDisplay';
+import FramePlayer from './FramePlayer';
 import { MicrophoneIcon, StopIcon, SpinnerIcon, SpeakerIcon, HistoryIcon, TrashIcon, CloseIcon, PositiveIcon, NegativeIcon, NeutralIcon } from './icons';
 
 declare global {
@@ -16,16 +17,20 @@ const HISTORY_STORAGE_KEY = 'translationHistory';
 
 interface TranslatorViewProps {
   onAskAssistant: (prompt: string) => void;
-  addXp?: (amount: number) => void;
 }
 
-const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant, addXp }) => {
+type TranslationMode = 'native' | 'industrial' | 'customer';
+
+const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
   const [inputText, setInputText] = useState<string>('');
   const [debouncedInputText, setDebouncedInputText] = useState<string>('');
   const [translatedText, setTranslatedText] = useState<string>('');
   const [displayedTranslatedText, setDisplayedTranslatedText] = useState<string>('');
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [targetLanguage, setTargetLanguage] = useState<string>('es');
+
+  // Dynamic translation mode
+  const [translationMode, setTranslationMode] = useState<TranslationMode>('industrial');
 
   const [inputLanguage, setInputLanguage] = useState<string>('auto');
   const [detectedLanguage, setDetectedLanguage] = useState<string>('');
@@ -58,6 +63,45 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant, addXp }
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+
+  // Dynamic layout styling config based on translation mode
+  const modeStyles = {
+    native: {
+      primary: 'emerald-600',
+      accent: 'emerald-500',
+      bg: 'bg-emerald-50/50',
+      border: 'border-emerald-200',
+      focusRing: 'focus-within:ring-emerald-200',
+      button: 'bg-emerald-600 hover:bg-emerald-700 text-white',
+      badge: 'bg-emerald-50 border border-emerald-200 text-emerald-700',
+      text: 'text-emerald-700',
+      rawText: 'Colloquial Native Translator'
+    },
+    industrial: {
+      primary: 'blue-600',
+      accent: 'blue-500',
+      bg: 'bg-blue-50/50',
+      border: 'border-blue-200',
+      focusRing: 'focus-within:ring-blue-200',
+      button: 'bg-blue-600 hover:bg-blue-700 text-white',
+      badge: 'bg-blue-50 border border-blue-200 text-blue-700',
+      text: 'text-blue-700',
+      rawText: 'Industrialized Technical Translator'
+    },
+    customer: {
+      primary: 'amber-600',
+      accent: 'amber-500',
+      bg: 'bg-amber-50/50',
+      border: 'border-amber-200',
+      focusRing: 'focus-within:ring-amber-200',
+      button: 'bg-amber-600 hover:bg-amber-700 text-white',
+      badge: 'bg-amber-50 border border-amber-200 text-amber-700',
+      text: 'text-amber-700',
+      rawText: 'Customer Satisfaction Translator'
+    }
+  };
+
+  const style = modeStyles[translationMode];
 
   // Load history
   useEffect(() => {
@@ -143,7 +187,17 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant, addXp }
       let currentDetLang = '';
       let translationError = false;
 
-      const tp = translateTextGroq(debouncedInputText, inputLanguage, targetLanguage)
+      // Map translation mode style instruction
+      let styleInstruction = '';
+      if (translationMode === 'native') {
+        styleInstruction = 'Translate in a natural, colloquial, and fluent native style appropriate for standard, everyday conversation.';
+      } else if (translationMode === 'industrial') {
+        styleInstruction = 'Translate in a precise, professional, technical, and corporate style suitable for engineering sprints and professional tasks.';
+      } else if (translationMode === 'customer') {
+        styleInstruction = 'Translate in an extremely polite, welcoming, empathetic, and customer-focused customer satisfaction style.';
+      }
+
+      const tp = translateTextGroq(debouncedInputText, inputLanguage, targetLanguage, styleInstruction)
         .then(res => {
           setTranslatedText(res.translatedText);
           currentTranslation = res.translatedText;
@@ -193,12 +247,11 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant, addXp }
           clarityScore: currentClar,
           detectedLanguageName: currentDetLang
         });
-        if (addXp) addXp(15); // Trigger XP reward!
       }
     };
 
     run();
-  }, [debouncedInputText, inputLanguage, targetLanguage, addToHistory]);
+  }, [debouncedInputText, inputLanguage, targetLanguage, translationMode, addToHistory]);
 
   // Speech Recognition (Web API)
   useEffect(() => {
@@ -259,7 +312,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant, addXp }
         try {
           const text = await transcribeAudioGroq(audioBlob, inputLanguage);
           if (text.trim()) setInputText(prev => { const t = prev.trim(); return t ? `${t} ${text.trim()}` : text.trim(); });
-        } catch (err: any) { setError('Whisper transcription failed: ' + err.message); }
+        } catch (err: any) { setError('Transcription failed: ' + err.message); }
         finally { setIsTranslating(false); }
       };
 
@@ -296,7 +349,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant, addXp }
           }
           
           if (Date.now() - lastSoundTime > 3000) { // 3-second pause auto-termination
-            console.log("Silence auto-termination triggered (3 second pause). Stopping recording.");
+            console.log("Silence auto-termination triggered. Stopping recording.");
             stopWhisperRecording();
           } else {
             animationFrameRef.current = requestAnimationFrame(checkSilence);
@@ -364,7 +417,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant, addXp }
 
       let wordCount = translatedText.split(/\s+/).length;
       if (['zh', 'ja', 'ko'].some(langCode => targetLanguage.startsWith(langCode))) {
-        wordCount = translatedText.length; // Use character count for CJK languages
+        wordCount = translatedText.length;
       }
       const estimatedDurationMs = Math.max(3000, (wordCount * 400) / speechRate + 3000);
 
@@ -384,7 +437,6 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant, addXp }
 
       const backupTimer = setTimeout(() => {
         if (!didComplete) {
-          console.warn("SpeechSynthesis onend failed to fire. Triggering backup resume.");
           window.speechSynthesis.cancel();
           completeSpeech();
         }
@@ -419,33 +471,57 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant, addXp }
   const renderSentimentIcon = (s: SentimentLabel) => {
     const cls = 'w-4 h-4';
     switch (s) {
-      case SentimentLabel.Positive: return <PositiveIcon className={`${cls} text-teal-500`} />;
+      case SentimentLabel.Positive: return <PositiveIcon className={`${cls} text-emerald-500`} />;
       case SentimentLabel.Negative: return <NegativeIcon className={`${cls} text-red-500`} />;
-      default: return <NeutralIcon className={`${cls} text-muted`} />;
+      default: return <NeutralIcon className={`${cls} text-slate-400`} />;
     }
   };
 
-  const selectCls = 'bg-black border border-primary text-primary px-4 py-3 text-xs outline-none font-bold cursor-pointer font-mono tracking-widest';
+  const selectCls = 'bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-lg text-sm outline-none font-semibold cursor-pointer focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors shadow-sm';
 
   return (
     <>
       {/* Left Column - Decryptor Workspace (70%) */}
-      <div className="lg:col-span-7 flex flex-col gap-6 lg:overflow-y-auto pr-2 lg:h-full min-h-0 scrollbar-thin">
+      <div className="col-span-full lg:col-span-7 flex flex-col gap-6">
         
         {/* Settings Control Panel */}
-        <div className="cyber-terminal p-4 rounded-none flex flex-col sm:flex-row items-center justify-between gap-4 bg-black/40">
-          <div className="flex flex-col sm:flex-row gap-3 w-full items-center">
-            
+        <div className="cyber-terminal p-4 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+          
+          {/* Translator Mode dynamic selector */}
+          <div className="flex items-center gap-2 self-start sm:self-center">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Engine:</span>
+            <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+              {(['native', 'industrial', 'customer'] as TranslationMode[]).map((modeOpt) => {
+                const isActive = translationMode === modeOpt;
+                let activeClass = '';
+                if (modeOpt === 'native') activeClass = isActive ? 'bg-emerald-600 text-white font-bold' : 'text-slate-600 hover:text-slate-900';
+                if (modeOpt === 'industrial') activeClass = isActive ? 'bg-blue-600 text-white font-bold' : 'text-slate-600 hover:text-slate-900';
+                if (modeOpt === 'customer') activeClass = isActive ? 'bg-amber-600 text-white font-bold' : 'text-slate-600 hover:text-slate-900';
+
+                return (
+                  <button
+                    key={modeOpt}
+                    onClick={() => setTranslationMode(modeOpt)}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all duration-200 capitalize ${activeClass}`}
+                  >
+                    {modeOpt}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-center justify-end">
             {/* Source Lang dropdown */}
             <div className="w-full sm:w-auto relative">
               <select value={inputLanguage} onChange={e => setInputLanguage(e.target.value)} className={selectCls}>
-                <option value="auto">🔍 AUTO-DETECT SIGNAL</option>
-                {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.name.toUpperCase()}</option>)}
+                <option value="auto">🔍 Auto-Detect Language</option>
+                {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
               </select>
             </div>
 
-            <div className="hidden sm:flex items-center justify-center text-primary/70 animate-pulse">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+            <div className="hidden sm:flex items-center justify-center text-slate-400">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </div>
@@ -453,29 +529,29 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant, addXp }
             {/* Target Lang dropdown */}
             <div className="w-full sm:w-auto">
               <select value={targetLanguage} onChange={e => setTargetLanguage(e.target.value)} className={selectCls}>
-                {LANGUAGES.map(l => <option key={l.code} value={l.code}>🗺️ {l.name.toUpperCase()}</option>)}
+                {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
               </select>
             </div>
           </div>
         </div>
 
         {/* Main Studio workspace Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 grid-cols-[repeat(auto-fit,minmax(min(100%,320px),1fr))] gap-6">
 
           {/* Input box */}
-          <div className="container-query-parent relative group flex flex-col h-[380px] md:h-[420px] cyber-terminal overflow-hidden focus-within:ring-2 focus-within:ring-primary/30 transition-all duration-300 responsive-card">
+          <div className={`container-query-parent relative group flex flex-col min-h-[300px] cyber-terminal transition-all duration-300 responsive-card ${style.focusRing}`}>
             
-            <div className="flex items-center justify-between p-4 border-b border-primary/20 bg-black/60">
+            <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 bg-primary animate-ping" />
-                <span className="text-xs font-bold uppercase tracking-wider text-primary font-mono">
-                  RAW INPUT FREQUENCY LOG ({inputLanguage === 'auto' ? `Auto-Detect${detectedLanguage ? `: ${detectedLanguage}` : ''}` : LANGUAGES.find(l => l.code === inputLanguage)?.name})
+                <span className={`w-2.5 h-2.5 rounded-full bg-${style.primary} animate-pulse`} />
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 font-sans">
+                  Source Text ({inputLanguage === 'auto' ? `Detecting${detectedLanguage ? `: ${detectedLanguage}` : ''}` : LANGUAGES.find(l => l.code === inputLanguage)?.name})
                 </span>
               </div>
               {inputText && (
                 <button 
                   onClick={() => { setInputText(''); setTranslatedText(''); setSentiment(null); setError(''); textareaRef.current?.focus(); }} 
-                  className="text-muted hover:text-red-500 p-1 rounded-none hover:bg-red-500/5 transition-colors cursor-pointer" 
+                  className="text-slate-400 hover:text-red-500 p-1 rounded-lg hover:bg-red-50 transition-colors cursor-pointer" 
                   title="Clear content"
                 >
                   <CloseIcon className="w-4 h-4" />
@@ -487,25 +563,25 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant, addXp }
               ref={textareaRef}
               value={inputText}
               onChange={e => setInputText(e.target.value)}
-              placeholder="Inject encrypted data stream or start vocal capture..."
-              className={`flex-grow w-full p-6 bg-transparent border-none resize-none focus:ring-0 text-sm leading-relaxed text-foreground placeholder-muted outline-none scrollbar-thin responsive-text ${isCjkInput ? 'font-sans' : 'font-mono'}`}
+              placeholder="Type or speak text here..."
+              className={`flex-grow w-full p-6 bg-transparent border-none resize-y min-h-[220px] focus:ring-0 text-sm leading-relaxed text-slate-800 placeholder-slate-400 outline-none responsive-text font-sans`}
             />
 
             {/* Character counter & Whisper/recording trigger */}
-            <div className="p-4 flex items-center justify-between border-t border-primary/20 bg-black/40">
-              <span className="text-xs text-muted font-mono">{inputText.length} bits</span>
+            <div className="p-4 flex items-center justify-between border-t border-slate-100 bg-slate-50">
+              <span className="text-xs text-slate-400 font-medium font-sans">{inputText.length} characters</span>
               <div className="relative">
                 {(isWhisperRecording || isRecording) && (
                   <span className="absolute -inset-1.5 bg-red-500 rounded-full animate-ping opacity-25" />
                 )}
                 <button
                   onClick={handleToggleRecording}
-                  className={`p-3.5 transition-all duration-300 shadow-md ${
+                  className={`p-3 rounded-xl transition-all duration-300 shadow-md ${
                     isRecording || isWhisperRecording
                       ? 'bg-red-600 text-white scale-105'
-                      : 'cyber-button rounded-none'
+                      : `cyber-button-${translationMode === 'native' ? 'pink' : translationMode === 'industrial' ? 'cyan' : 'pink'} rounded-xl`
                   } cursor-pointer`}
-                  title={isRecording || isWhisperRecording ? 'Terminate Stream' : 'Vocal Uplink'}
+                  title={isRecording || isWhisperRecording ? 'Stop Recording' : 'Voice Input'}
                 >
                   {isRecording || isWhisperRecording ? <StopIcon className="w-5 h-5" /> : <MicrophoneIcon className="w-5 h-5" />}
                 </button>
@@ -514,53 +590,53 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant, addXp }
           </div>
 
           {/* Output box */}
-          <div className="container-query-parent relative flex flex-col h-[380px] md:h-[420px] cyber-terminal overflow-hidden transition-all duration-300 responsive-card">
+          <div className="container-query-parent relative flex flex-col min-h-[300px] cyber-terminal transition-all duration-300 responsive-card">
             
-            <div className="flex items-center justify-between p-4 border-b border-primary/20 bg-black/60">
+            <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 bg-accent animate-pulse" />
-                <span className="text-xs font-bold uppercase tracking-wider text-accent font-mono">
-                  DECRYPTED DATAPACK PAYLOAD ({LANGUAGES.find(l => l.code === targetLanguage)?.name})
+                <span className={`w-2.5 h-2.5 rounded-full bg-${style.accent} animate-pulse`} />
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 font-sans">
+                  Translation Output ({LANGUAGES.find(l => l.code === targetLanguage)?.name})
                 </span>
               </div>
-              {isTranslating && <SpinnerIcon className="w-4 h-4 animate-spin text-accent" />}
+              {isTranslating && <SpinnerIcon className="w-4 h-4 animate-spin text-slate-500" />}
             </div>
 
-            <div className={`flex-grow p-6 overflow-y-auto min-h-[160px] scrollbar-thin text-sm ${isCjkTarget ? 'font-sans' : 'font-mono'}`}>
+            <div className="flex-grow p-6 min-h-[220px] text-sm font-sans">
               {displayedTranslatedText ? (
-                <p className={`leading-relaxed text-foreground whitespace-pre-wrap responsive-text ${isCjkTarget ? 'font-sans' : 'font-mono'}`}>
+                <p className="leading-relaxed text-slate-800 whitespace-pre-wrap responsive-text">
                   {displayedTranslatedText}
                   {isStreaming && (
-                    <span className="inline-block w-1.5 h-4 ml-1 bg-accent animate-pulse shadow-[0_0_8px_var(--accent)]" />
+                    <span className={`inline-block w-1.5 h-4 ml-1 bg-${style.primary} animate-pulse`} />
                   )}
                 </p>
               ) : isTranslating ? (
-                <p className="text-muted italic animate-pulse">Mainframe AI decrypting stream...</p>
+                <p className="text-slate-400 italic animate-pulse">AI generating translation...</p>
               ) : (
-                <p className="text-muted italic">Waiting for target signal payload...</p>
+                <p className="text-slate-400 italic">Waiting for text input...</p>
               )}
               {error && <p className="text-red-500 text-sm mt-4 font-medium">{error}</p>}
             </div>
 
             {/* Quick Co-pilot & Speak controls */}
-            <div className="p-4 bg-black/40 border-t border-primary/20 flex items-center justify-between flex-wrap gap-3">
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-3">
                 {translatedText && (
                   <>
                     <button
                       onClick={() => onAskAssistant(`I am working on this translation from ${inputLanguage === 'auto' ? 'Auto-Detect' : LANGUAGES.find(l => l.code === inputLanguage)?.name} to ${LANGUAGES.find(l => l.code === targetLanguage)?.name}:\n\nInput: "${inputText}"\nTranslated: "${translatedText}"\n\nCan you explain the key grammar structures or suggest idiomatic alternatives?`)}
-                      className="cyber-button px-4 py-2 text-xs"
+                      className={`px-4 py-2 rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer bg-white border border-slate-200 text-slate-700 hover:bg-slate-50`}
                     >
-                      ✨ ANALYZE CO-PILOT
+                      ✨ Grammar & Phrases
                     </button>
 
                     {/* Speech rate slider */}
-                    <div className="flex items-center gap-2 bg-black/80 px-3 py-1.5 border border-primary/20 shadow-inner font-mono">
-                      <span className="text-[10px] font-mono font-bold text-muted w-6 text-right">{speechRate}x</span>
+                    <div className="flex items-center gap-2 bg-white px-3 py-1.5 border border-slate-200 rounded-lg shadow-sm font-sans text-xs">
+                      <span className="text-[10px] font-bold text-slate-400 w-6 text-right">{speechRate}x</span>
                       <input
                         type="range" min="0.5" max="2" step="0.25" value={speechRate}
                         onChange={e => setSpeechRate(parseFloat(e.target.value))}
-                        className="w-16 h-1 bg-primary/20 rounded-lg appearance-none cursor-pointer accent-primary"
+                        className="w-16 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                       />
                     </div>
                   </>
@@ -570,7 +646,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant, addXp }
               {translatedText && (
                 <button
                   onClick={handleSpeak}
-                  className={`p-2.5 transition-all shadow-sm border border-primary/45 ${isSpeaking ? 'bg-primary/20 text-primary scale-105' : 'text-muted hover:text-primary'} cursor-pointer`}
+                  className={`p-2.5 rounded-lg border transition-all shadow-sm ${isSpeaking ? 'bg-indigo-50 border-indigo-200 text-indigo-600 scale-105' : 'bg-white border-slate-200 text-slate-400 hover:text-slate-600'} cursor-pointer`}
                   title="Speak Text"
                 >
                   {isSpeaking ? <StopIcon className="w-5 h-5" /> : <SpeakerIcon className="w-5 h-5" />}
@@ -580,61 +656,61 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant, addXp }
           </div>
         </div>
 
-        {/* Chronological History Timeline */}
+        {/* Translation History Timeline */}
         {history.length > 0 && (
-          <div className="cyber-terminal overflow-hidden bg-black/20">
-            <div className="p-4 border-b border-primary/20 bg-black/60 flex items-center justify-between">
+          <div className="cyber-terminal overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm">
+            <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <HistoryIcon className="w-4 h-4 text-primary" />
-                <span className="text-xs font-bold uppercase tracking-wider text-primary font-mono">MEM-BUFFER COGNITIVE TIMELINE</span>
+                <HistoryIcon className="w-4 h-4 text-slate-500" />
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 font-sans">Translation History</span>
               </div>
               <button 
                 onClick={clearHistory} 
-                className="text-xs font-bold text-red-500 hover:text-red-600 px-3 py-1 border border-red-500/20 hover:bg-red-500/5 transition-all flex items-center gap-1.5 cursor-pointer font-mono"
+                className="text-xs font-semibold text-red-600 hover:text-red-700 px-3 py-1.5 border border-slate-200 bg-white hover:bg-slate-50 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
-                <TrashIcon className="w-3.5 h-3.5" /> PURGE BUFFER
+                <TrashIcon className="w-3.5 h-3.5" /> Clear History
               </button>
             </div>
             
-            <div className="p-6 overflow-y-auto max-h-[300px] scrollbar-thin">
-              <div className="relative border-l border-primary/30 ml-3 pl-6 space-y-6">
+            <div className="p-6">
+              <div className="relative border-l-2 border-slate-100 ml-3 pl-6 space-y-6">
                 {history.map((item) => (
                   <div 
                     key={item.id} 
-                    className="relative group cursor-pointer"
+                    className="relative group cursor-pointer animate-in fade-in duration-300"
                     onClick={() => loadFromHistory(item)}
                   >
                     {/* Circle dot on the line */}
-                    <span className="absolute -left-[31px] top-1.5 w-3.5 h-3.5 bg-black border border-primary group-hover:bg-primary transition-colors flex items-center justify-center">
-                      <span className="w-1.5 h-1.5 bg-white/0 group-hover:bg-white transition-colors" />
+                    <span className="absolute -left-[31px] top-1.5 w-3.5 h-3.5 rounded-full bg-white border-2 border-slate-200 group-hover:border-indigo-500 transition-colors flex items-center justify-center">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-200 group-hover:bg-indigo-500 transition-colors" />
                     </span>
 
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3.5 bg-black/40 hover:bg-black border border-primary/10 hover:border-primary/40 transition-all">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-100 group-hover:border-slate-200 rounded-xl transition-all">
                       <div className="flex-grow min-w-0 mr-4">
                         <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-[10px] font-mono text-muted">
-                            {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          <span className="text-[10px] text-slate-400 font-medium">
+                            {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
-                          <span className="w-1 h-1 rounded-full bg-border" />
-                          <span className="text-[10px] font-bold text-primary uppercase font-mono">
+                          <span className="w-1 h-1 rounded-full bg-slate-300" />
+                          <span className="text-[10px] font-bold text-indigo-600 uppercase">
                             {item.detectedLanguageName ? `${item.detectedLanguageName} → ${item.targetLanguageName}` : `Auto → ${item.targetLanguageName}`}
                           </span>
                         </div>
-                        <p className={`text-xs text-muted truncate ${['zh', 'ja', 'ko'].some(code => item.inputText.includes(code)) ? 'font-sans' : 'font-mono'}`}>{item.inputText}</p>
-                        <p className={`text-sm font-bold text-foreground mt-0.5 ${['zh', 'ja', 'ko'].includes(item.targetLanguage) ? 'font-sans' : 'font-mono'}`}>{item.translatedText}</p>
+                        <p className="text-xs text-slate-500 truncate font-sans">{item.inputText}</p>
+                        <p className="text-sm font-semibold text-slate-800 mt-0.5 font-sans">{item.translatedText}</p>
                       </div>
                       
                       <div className="flex items-center gap-3 flex-shrink-0 self-end sm:self-center">
                         {item.sentiment && (
-                          <div className="flex items-center gap-1 px-2.5 py-1 bg-black border border-primary/20 text-[9px] font-bold text-muted shadow-sm font-mono">
+                          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white border border-slate-200 text-[10px] font-bold text-slate-600 shadow-sm font-sans">
                             {renderSentimentIcon(item.sentiment.sentiment)}
-                            <span>{item.sentiment.sentiment.toUpperCase()}</span>
+                            <span className="capitalize">{item.sentiment.sentiment}</span>
                           </div>
                         )}
                         
                         <button
                           onClick={e => { e.stopPropagation(); deleteHistoryItem(item.id); }}
-                          className="opacity-0 group-hover:opacity-100 p-1.5 bg-black border border-red-500/30 text-muted hover:text-red-500 shadow-sm transition-all cursor-pointer"
+                          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-red-500 shadow-sm transition-all cursor-pointer"
                         >
                           <TrashIcon className="w-3.5 h-3.5" />
                         </button>
@@ -649,18 +725,18 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant, addXp }
       </div>
 
       {/* Right Column - AI Insights (30%) */}
-      <div className="lg:col-span-3 flex flex-col gap-6 lg:overflow-y-auto pr-2 lg:h-full min-h-0 scrollbar-thin">
+      <div className="col-span-full lg:col-span-3 flex flex-col gap-6">
         
         {/* Detection Confidence Card */}
         {detectedLanguage && inputLanguage === 'auto' && (
-          <div className="cyber-terminal p-4 flex items-center justify-between bg-black/40">
-            <span className="text-xs font-bold text-muted uppercase tracking-wider font-mono">detected locale</span>
+          <div className="cyber-terminal p-4 flex items-center justify-between bg-white border border-slate-200 rounded-xl shadow-sm">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider font-sans">Detected Language</span>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 border border-primary/30 text-xs font-black text-primary font-mono">
+              <span className="px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-100 text-xs font-bold text-indigo-600">
                 {detectedLanguage.toUpperCase()}
               </span>
-              <span className="text-xs font-mono font-bold text-muted">
-                {Math.round(languageConfidence * 100)}%
+              <span className="text-xs font-bold text-slate-500">
+                {Math.round(languageConfidence * 100)}% Match
               </span>
             </div>
           </div>
@@ -671,17 +747,17 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant, addXp }
           <div className="flex flex-col gap-4">
             {[
               { label: 'Translation Quality', score: qualityScore, color: 'from-emerald-600 to-green-400' },
-              { label: 'Grammar & Clarity', score: clarityScore, color: 'from-cyan-600 to-blue-400' },
-              { label: 'AI Match Confidence', score: languageConfidence, color: 'from-fuchsia-600 to-pink-500' }
+              { label: 'Grammar & Clarity', score: clarityScore, color: 'from-blue-600 to-indigo-400' },
+              { label: 'Confidence Match', score: languageConfidence, color: 'from-purple-600 to-pink-500' }
             ].map((stat, sIdx) => {
               const pct = Math.round(stat.score * 100);
               return (
-                <div key={sIdx} className="cyber-terminal p-4 flex flex-col justify-between bg-black/40">
-                  <div className="flex justify-between items-center mb-2 font-mono">
-                    <span className="text-xs font-bold text-muted uppercase tracking-wider">{stat.label}</span>
-                    <span className="text-sm font-black text-foreground">{pct}%</span>
+                <div key={sIdx} className="cyber-terminal p-4 flex flex-col justify-between bg-white border border-slate-200 rounded-xl shadow-sm">
+                  <div className="flex justify-between items-center mb-2 font-sans">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{stat.label}</span>
+                    <span className="text-sm font-extrabold text-slate-800">{pct}%</span>
                   </div>
-                  <div className="h-1.5 w-full bg-slate-950 border border-primary/20 rounded-none overflow-hidden">
+                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
                     <div 
                       className={`h-full bg-gradient-to-r ${stat.color} transition-all duration-700`}
                       style={{ width: `${pct}%` }}
@@ -694,14 +770,30 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant, addXp }
         )}
 
         {/* Sentiment Insights Panel */}
-        <div className="cyber-terminal-cyan overflow-hidden flex flex-col flex-shrink-0 bg-black/20">
-          <div className="p-4 border-b border-accent/20 bg-black/60 flex items-center gap-2">
-            <div className="w-2.5 h-2.5 bg-accent animate-pulse" />
-            <span className="text-xs font-bold uppercase tracking-wider text-accent font-mono">BIOMETRIC PSYCHE READOUT</span>
+        <div className="cyber-terminal overflow-hidden flex flex-col flex-shrink-0 bg-white border border-slate-200 rounded-xl shadow-sm">
+          <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+            <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse" />
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-700 font-sans">Tone & Sentiment Analysis</span>
           </div>
           <div className="p-5 bg-transparent">
             <SentimentDisplay sentimentResult={sentiment} isLoading={isAnalyzingSentiment} />
           </div>
+        </div>
+
+        {/* Dynamic Video Guide Walkthrough */}
+        <div className="cyber-terminal bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+          <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Live Translation Walkthrough</h4>
+          <video
+            src="/trail.mp4"
+            controls
+            playsInline
+            preload="metadata"
+            className="w-full rounded-lg overflow-hidden border border-slate-100 shadow-sm"
+            style={{ display: 'block' }}
+          />
+          <p className="text-[11px] text-slate-500 mt-3 leading-relaxed">
+            Click the play button to see how the system captures voices, draws real-time wave signals, and translates speech on the fly.
+          </p>
         </div>
       </div>
     </>
