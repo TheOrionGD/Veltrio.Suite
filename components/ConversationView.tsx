@@ -316,7 +316,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
     <div className="w-full flex flex-col items-center justify-center min-h-[65vh] relative max-w-4xl">
       
       {/* Top Selector Dock (Boundary-less) */}
-      <div className="glass-pill px-6 py-2.5 flex items-center justify-between w-full max-w-md shadow-[0_8px_32px_rgba(0,0,0,0.15)] mb-12">
+      <div className="w-full max-w-md flex items-center justify-between px-4 md:px-6 py-3 md:py-2.5 md:glass-pill md:shadow-[0_8px_32px_rgba(0,0,0,0.15)] mb-8 md:mb-12 border-b md:border-none border-zinc-200/50 dark:border-white/5 pb-4 md:pb-2.5">
         <div className="flex items-center gap-2">
           <span className="text-[10px] uppercase tracking-wider text-zinc-550 dark:text-zinc-400 font-bold">Locale:</span>
           <select
@@ -409,7 +409,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm glass-panel h-full rounded-l-3xl rounded-r-none border-l border-zinc-200 dark:border-white/10 p-6 flex flex-col justify-between overflow-hidden shadow-2xl animate-in slide-in-from-right duration-300"
+            className="w-full max-w-sm h-full bg-zinc-50 dark:bg-zinc-950 md:bg-transparent md:glass-panel rounded-none md:rounded-l-3xl md:rounded-r-none border-none md:border-l border-zinc-250 dark:border-white/10 p-6 flex flex-col justify-between overflow-hidden shadow-2xl animate-in slide-in-from-right duration-300"
           >
             <div className="flex items-center justify-between pb-4 border-b border-zinc-200/50 dark:border-white/5">
               <div className="flex items-center gap-2">

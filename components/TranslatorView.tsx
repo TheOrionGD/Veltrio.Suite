@@ -568,7 +568,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
     <div className="w-full flex flex-col gap-8 items-center justify-center min-h-[70vh]">
       
       {/* Floating Workspace Settings Panel (Boundary-less glass capsule) */}
-      <div className="glass-pill px-6 py-2.5 flex items-center justify-between gap-6 w-full max-w-4xl shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
+      <div className="w-full max-w-4xl flex flex-col sm:flex-row items-center justify-between gap-4 px-4 md:px-6 py-3 md:py-2.5 md:glass-pill md:shadow-[0_8px_32px_rgba(0,0,0,0.2)] border-b sm:border-none border-zinc-200/50 dark:border-white/5 pb-4 sm:pb-0">
         
         {/* Language Flow Selector */}
         <div className="flex items-center gap-3">
@@ -639,7 +639,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
       <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
         
         {/* Left column: Boundary-less Writing Space */}
-        <div className="glass-panel p-8 flex flex-col justify-between min-h-[360px] relative transition-all duration-300 group hover:border-zinc-300/40 dark:hover:border-white/15">
+        <div className="w-full p-4 md:p-8 flex flex-col justify-between min-h-[300px] md:min-h-[360px] relative transition-all duration-300 group md:glass-panel md:hover:border-zinc-300/40 md:dark:hover:border-white/15 border-b md:border-none border-zinc-200/50 dark:border-white/5 pb-6">
           <div className="flex items-center justify-between pb-3 border-b border-zinc-200/50 dark:border-white/5">
             <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
               <span className={`w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse`} />
@@ -697,7 +697,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
         </div>
 
         {/* Right column: Translucent Translation Bubble View */}
-        <div className="glass-panel p-8 flex flex-col justify-between min-h-[360px] relative border-l border-zinc-200/50 dark:border-white/5 transition-all duration-300 group hover:border-zinc-300/40 dark:hover:border-white/15">
+        <div className="w-full p-4 md:p-8 flex flex-col justify-between min-h-[300px] md:min-h-[360px] relative transition-all duration-300 group md:glass-panel md:hover:border-zinc-300/40 md:dark:hover:border-white/15 pt-6 md:pt-8">
           <div className="flex items-center justify-between pb-3 border-b border-zinc-200/50 dark:border-white/5">
             <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
               <span className={`w-1.5 h-1.5 rounded-full ${currentStyle.color} ${currentStyle.border}`} />
@@ -805,7 +805,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm glass-panel h-full rounded-l-3xl rounded-r-none border-l border-zinc-200 dark:border-white/10 p-6 flex flex-col justify-between overflow-hidden shadow-2xl animate-in slide-in-from-right duration-300"
+            className="w-full max-w-sm h-full bg-zinc-50 dark:bg-zinc-950 md:bg-transparent md:glass-panel rounded-none md:rounded-l-3xl md:rounded-r-none border-none md:border-l border-zinc-250 dark:border-white/10 p-6 flex flex-col justify-between overflow-hidden shadow-2xl animate-in slide-in-from-right duration-300"
           >
             <div className="flex items-center justify-between pb-4 border-b border-zinc-200/50 dark:border-white/5">
               <div className="flex items-center gap-2">

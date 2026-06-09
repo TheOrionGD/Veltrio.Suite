@@ -77,20 +77,21 @@ The deck is constructed as a React SPA optimized for speed, responsive layouts, 
 3. [System Architecture](#system-architecture)
 4. [Functional Workflow](#functional-workflow)
 5. [Interface Component Breakdown](#interface-component-breakdown)
-6. [Directory & Folder Structure](#directory--folder-structure)
-7. [Service Layer & API Reference](#service-layer--api-reference)
-8. [Configuration & Environment Variables](#configuration--environment-variables)
-9. [Detailed Voice Activity Detection (VAD) & Web Audio Systems](#detailed-voice-activity-detection-vad--web-audio-systems)
-10. [Gamification & XP Calculation Engine](#gamification--xp-calculation-engine)
-11. [Installation & Getting Started](#installation--getting-started)
-12. [Deployment & Staging Infrastructure](#deployment--staging-infrastructure)
-13. [Performance & Optimizations](#performance--optimizations)
-14. [Security, Privacy & Data Compliance](#security-privacy--data-compliance)
-15. [Testing Protocol](#testing-protocol)
-16. [Troubleshooting & FAQ](#troubleshooting--faq)
-17. [Hackathon Team & Credits](#hackathon-team--credits)
-18. [Acknowledgments](#acknowledgments)
-19. [License](#license)
+6. [Desktop vs. Mobile Layout Architectures](#desktop-vs-mobile-layout-architectures)
+7. [Directory & Folder Structure](#directory--folder-structure)
+8. [Service Layer & API Reference](#service-layer--api-reference)
+9. [Configuration & Environment Variables](#configuration--environment-variables)
+10. [Detailed Voice Activity Detection (VAD) & Web Audio Systems](#detailed-voice-activity-detection-vad--web-audio-systems)
+11. [Gamification & XP Calculation Engine](#gamification--xp-calculation-engine)
+12. [Installation & Getting Started](#installation--getting-started)
+13. [Deployment & Staging Infrastructure](#deployment--staging-infrastructure)
+14. [Performance & Optimizations](#performance--optimizations)
+15. [Security, Privacy & Data Compliance](#security-privacy--data-compliance)
+16. [Testing Protocol](#testing-protocol)
+17. [Troubleshooting & FAQ](#troubleshooting--faq)
+18. [Hackathon Team & Credits](#hackathon-team--credits)
+19. [Acknowledgments](#acknowledgments)
+20. [License](#license)
 
 
 ---
@@ -285,6 +286,24 @@ A visual rendering module that draws voice frequencies on an HTML5 `<canvas>` el
     $$y = A \sin(Bx - C) + D$$
     Where $A$ is the amplitude driven by sound levels, $B$ is frequency multiplier, $C$ represents phase shift over frame updates, and $D$ is vertical center offset.
 *   **Visual Highlights:** High-refresh-rate canvas grids, glowing canvas shadows, and smooth scaling based on input volumes.
+
+---
+
+## Desktop vs. Mobile Layout Architectures
+
+Veltrio implements a highly responsive, screen-adaptive layout framework that dynamically transitions between two distinct design philosophies based on viewport properties. This ensures optimal visual immersion and maximum utility on both large developer workstations and compact mobile viewports.
+
+### 1. Interactive Scrollytelling (Landing Page)
+*   **Desktop Layout:** Renders content cards utilizing deep glassmorphic structures (`glass-panel`). These panels are placed inside horizontal grid blocks (aligned to the left, right, or center of the canvas area) to offset text against 49 high-resolution landscape background frames.
+*   **Mobile Layout (Cardless & Cinematic):** Card boundaries and borders are stripped entirely to prevent boxed elements from dominating the vertical display space. The scrollytelling copy floats directly over 50 portrait background frames as borderless cinematic subtitles. Form controls inside the interactive sandbox (e.g. phrase input and language dropdowns) are re-imagined as borderless, underlined text fields.
+
+### 2. Written Link (TranslatorView)
+*   **Desktop Layout:** Renders side-by-side translation panels housed in distinct glass cards with rich padding, copy controls, and a floating pill-shaped workspace settings bar.
+*   **Mobile Layout (Fluid Single-Pane Flow):** Strips card borders, rounded corners, backgrounds, and shadows from translation cards (via responsive `md:glass-panel` rules), allowing the source and destination panels to stack and flow as a single continuous text sheet. The settings pill is restructured into a stackable vertical flow to accommodate small widths.
+
+### 3. Voice Link (ConversationView)
+*   **Desktop Layout:** Controls and settings are housed in a floating pill-shaped capsule (`glass-pill`) above the Voice Core Orb. Log sidebars slide out as floating glass drawer panels (`glass-panel`) with rounded corners and distinct borders.
+*   **Mobile Layout (Full Screen Sheet Overlay):** The settings capsule is replaced by a flat, borderless bar with ambient dividing lines. The dialogue logs drawer transitions from a floating glass pane into a solid, full-screen overlay sheet (`bg-zinc-50 dark:bg-zinc-950`) to maximize touch interactivity and reading space.
 
 ---
 
