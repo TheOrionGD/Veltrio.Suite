@@ -10,46 +10,141 @@ interface StageConfig {
   label: string;
   title: string;
   desc: string;
-  leftHUD: string;
-  rightHUD: string;
+  leftHUD: string;   // shown top-right
+  rightHUD: string;  // shown bottom-right
+  bottomLeft: string; // shown bottom-left
+  align: 'left' | 'right' | 'center'; // text block position per stage
 }
 
-const STAGES: StageConfig[] = [
+// Desktop stages — aligned to frame_one landscape video arc:
+// f1_1–7:   Two professionals talking in glass-wall office
+// f1_8–14:  Glowing voice wave streams from mouth — acoustic capture
+// f1_15–22: "SPEECH CAPTURE" glass node — words orbit a silhouette
+// f1_23–30: Camera fly-through: LANGUAGE DETECTION → TRANSLATION glass node
+// f1_31–38: "SENTIMENT ANALYSIS" glowing green glass cube
+// f1_39–46: Full multilingual corridor — SPEECH CAPTURE / TRANSLATION / SENTIMENT ANALYSIS
+// f1_47–49: Veltrio logo + "Human-Centered Intelligence" outro
+const DESKTOP_STAGES: StageConfig[] = [
   {
+    // f1_1–7: Two professionals talking in glass-wall office.
+    // Heavy composition on the left — text lives on the right side.
     label: '01 / ACOUSTIC CAPTURE',
     title: 'Understanding Begins With Listening',
-    desc: 'Veltrio tracks raw audio waves, capturing vocal frequencies and mapping acoustic signals instantly.',
+    desc: 'Veltrio captures every spoken word — mapping vocal frequencies and acoustic signals the moment a conversation begins.',
     leftHUD: 'STT AUDIO PIPELINE: ACTIVE',
-    rightHUD: 'WHISPER-V3 MODEL: RUNNING (16KHZ)'
+    rightHUD: 'WHISPER-V3 MODEL: RUNNING (16KHZ)',
+    bottomLeft: 'CORE INTERFACE SYNC',
+    align: 'right',
   },
   {
-    label: '02 / COGNITIVE DECODING',
-    title: 'Every Language Carries Meaning',
-    desc: 'Advanced LLM comprehension decodes intent, sentiment, and emotional tone beyond simple syntax.',
-    leftHUD: 'COMPREHENSION ENGINE: Llama-3.3-70B',
-    rightHUD: 'VALENCY CONFIDENCE: 98.4% (EXCELLENT)'
+    // f1_8–14: Man profile on LEFT, glowing golden wave streams to the RIGHT.
+    // Wave fills right half — text placed on the left to counterbalance.
+    label: '02 / SPEECH CAPTURE',
+    title: 'Every Word Is A Signal',
+    desc: "Raw audio is isolated, cleaned, and passed into Veltrio's speech capture engine for precise phoneme-level transcription.",
+    leftHUD: 'SPEECH CAPTURE: ENGAGED',
+    rightHUD: 'PHONEME RESOLUTION: 98.7% ACCURACY',
+    bottomLeft: 'CORE INTERFACE SYNC',
+    align: 'left',
   },
   {
-    label: '03 / SEMANTIC STACK',
-    title: 'Context Matters More Than Words',
-    desc: 'Our system analyzes conversational history, domain vocabulary, and cultural nuances in real-time.',
-    leftHUD: 'SEMANTIC SEGMENTATION: INTEGRATED',
-    rightHUD: 'HISTORY STACK: 256 TOKENS IN MEMORY'
+    // f1_15–30: "SPEECH CAPTURE" node center-left, "LANGUAGE DETECTION" label left,
+    // "TRANSLATION" node center — content is center-heavy, text goes right.
+    label: '03 / LANGUAGE DETECTION',
+    title: 'Language Identity, Resolved Instantly',
+    desc: 'Advanced language detection identifies dialect, script, and linguistic origin — so translation is always precisely targeted.',
+    leftHUD: 'LANGUAGE DETECTION: RUNNING',
+    rightHUD: 'DETECTION LATENCY: < 80ms',
+    bottomLeft: 'CORE INTERFACE SYNC',
+    align: 'right',
   },
   {
-    label: '04 / SYNTACTIC TRANSFORMATION',
-    title: 'AI Preserves Intent',
-    desc: 'Sub-second cross-language compilation maps ideas accurately without losing professional terminology.',
-    leftHUD: 'TRANSLATION MATRIX: LATENCY 140ms',
-    rightHUD: 'ACTIVE VOICES: 5 LANGUAGES (EN, ES, FR, DE, ZH)'
+    // f1_31–38: "SENTIMENT ANALYSIS" glowing green glass cube dead center.
+    // Center composition — text placed on the left to avoid blocking the cube.
+    label: '04 / SENTIMENT ANALYSIS',
+    title: 'Tone Decoded Beyond Words',
+    desc: 'Veltrio reads emotional tone, intent, and sentiment from every sentence — ensuring meaning is never lost in translation.',
+    leftHUD: 'SENTIMENT ENGINE: ONLINE',
+    rightHUD: 'VALENCY CONFIDENCE: 98.4% (EXCELLENT)',
+    bottomLeft: 'CORE INTERFACE SYNC',
+    align: 'left',
   },
   {
+    // f1_39–49: Full multilingual corridor (SPEECH CAPTURE → TRANSLATION → SENTIMENT ANALYSIS)
+    // vanishing-point perspective — text placed right to frame the left-side pipeline.
     label: '05 / HUMAN SYNC',
     title: 'Human Understanding Delivered',
-    desc: 'Real-time human alignment is established. Language barriers dissolve into a unified collaborative flow.',
-    leftHUD: 'COMMUNICATION EFFORTLESS: PASS',
-    rightHUD: 'PEER-TO-PEER LATENCY: < 5ms'
-  }
+    desc: 'Speech Capture · Translation · Sentiment Analysis — unified in a single real-time pipeline. Language barriers dissolve.',
+    leftHUD: 'FULL PIPELINE: SPEECH · TRANSLATION · SENTIMENT',
+    rightHUD: 'PEER-TO-PEER LATENCY: < 5ms',
+    bottomLeft: 'CORE INTERFACE SYNC',
+    align: 'right',
+  },
+];
+
+// Mobile stages — aligned to frame_two portrait video arc:
+// f2_1–8:   Two professionals face-to-face in premium corporate lobby
+// f2_9–14:  Audio wave between them — "English" on left, "Spanish" on right
+// f2_15–22: Stacked glass architecture (Speech Capture → Transcription → Language Detection → Translation Intelligence → Sentiment Analysis → AI → Speech Synthesis)
+// f2_23–35: Stack activates — "Hello" → "Gracias", "Thank You" live bubbles
+// f2_36–46: Full system firing — multi-language outputs streaming in real-time
+// f2_47–50: Complete system with AI·Irate base powering the pipeline
+const MOBILE_STAGES: StageConfig[] = [
+  {
+    // f2_1–8: Woman (navy) on LEFT facing Man (gray) on RIGHT in corporate lobby.
+    // Both figures split the frame — text centered between them.
+    label: '01 / CONVERSATION BEGINS',
+    title: 'Two Languages, One Conversation',
+    desc: 'Veltrio bridges professionals across languages in real-time — the moment they speak, the system listens.',
+    leftHUD: 'VOICE LINK: ESTABLISHED',
+    rightHUD: 'WHISPER-V3 MODEL: RUNNING (16KHZ)',
+    bottomLeft: 'CORE INTERFACE SYNC',
+    align: 'center',
+  },
+  {
+    // f2_9–14: "English" label on LEFT, "Spanish" on RIGHT, wave between them.
+    // Wave is centered — text centered to let the labels breathe on either side.
+    label: '02 / ACOUSTIC BRIDGE',
+    title: 'Sound Becomes Data',
+    desc: 'Audio waves are captured the instant they leave your lips — English, Spanish, any language — processed immediately.',
+    leftHUD: 'SPEECH CAPTURE: ACTIVE',
+    rightHUD: 'LANGUAGE PAIR: EN ↔ ES',
+    bottomLeft: 'CORE INTERFACE SYNC',
+    align: 'center',
+  },
+  {
+    // f2_15–22: Stacked glass architecture stack occupies CENTER of portrait frame.
+    // Stack is tall and narrow — text placed on the left so it reads beside the stack.
+    label: '03 / AI LAYER STACK',
+    title: 'Intelligence Stacked In Layers',
+    desc: 'Speech Capture · Transcription · Language Detection · Translation Intelligence · Sentiment Analysis · Speech Synthesis — each layer firing in sequence.',
+    leftHUD: 'PIPELINE LAYERS: 6 ACTIVE',
+    rightHUD: 'STACK LATENCY: < 140ms TOTAL',
+    bottomLeft: 'AI PIPELINE SYNC',
+    align: 'left',
+  },
+  {
+    // f2_23–35: Translation bubbles ("Hello" → "Gracias", "Thank You") appear LEFT and RIGHT of stack.
+    // Bubbles spill right — text anchored left to avoid collision.
+    label: '04 / LIVE TRANSLATION',
+    title: 'Words Translated As You Speak',
+    desc: '"Hello" becomes "Gracias". "Thank You" arrives instantly. Real-time translation with no delay and no errors.',
+    leftHUD: 'TRANSLATION INTELLIGENCE: LIVE',
+    rightHUD: 'ACTIVE VOICES: 5 LANGUAGES (EN, ES, FR, DE, ZH)',
+    bottomLeft: 'TRANSLATION MATRIX SYNC',
+    align: 'left',
+  },
+  {
+    // f2_36–50: Full system firing — outputs spill across the full frame width.
+    // Dense multi-language output — text centered so it anchors the chaos.
+    label: '05 / FULL SYSTEM ONLINE',
+    title: 'Every Layer Working As One',
+    desc: 'The complete AI pipeline is live — transcription, detection, translation, sentiment, and speech synthesis firing simultaneously.',
+    leftHUD: 'SYSTEM STATUS: ALL LAYERS ONLINE',
+    rightHUD: 'PEER-TO-PEER LATENCY: < 5ms',
+    bottomLeft: 'CORE INTERFACE SYNC',
+    align: 'center',
+  },
 ];
 
 const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
@@ -59,10 +154,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   // Desktop frames: frame_one (49 landscape jpgs)
   const desktopImagesRef = useRef<HTMLImageElement[]>([]);
   const [desktopLoaded, setDesktopLoaded] = useState(false);
+  const [desktopLoadCount, setDesktopLoadCount] = useState(0);
 
   // Mobile frames: frame_two (50 portrait jpgs)
   const mobileImagesRef = useRef<HTMLImageElement[]>([]);
   const [mobileLoaded, setMobileLoaded] = useState(false);
+  const [mobileLoadCount, setMobileLoadCount] = useState(0);
 
   // Track whether we are on a mobile-width viewport
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
@@ -72,10 +169,49 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   const targetProgressRef = useRef(0);
   const currentProgressRef = useRef(0);
 
+  // Loader states
+  const [showLoader, setShowLoader] = useState(true);
+  const [isFadingOut, setIsFadingOut] = useState(false);
+
   // Derived: which image set & total are currently active
   const activeImagesRef = isMobile ? mobileImagesRef : desktopImagesRef;
   const activeTotalFrames = isMobile ? 50 : 49;
   const imagesLoaded = isMobile ? mobileLoaded : desktopLoaded;
+
+  const progressPercent = isMobile
+    ? Math.round((mobileLoadCount / 50) * 100)
+    : Math.round((desktopLoadCount / 49) * 100);
+
+  const getLoaderMessage = (percent: number) => {
+    if (percent < 20) return 'Establishing secure connection...';
+    if (percent < 50) return 'Caching visual frame sequences...';
+    if (percent < 80) return 'Initializing cognitive layers...';
+    if (percent < 100) return 'Syncing audio interfaces...';
+    return 'Core interface online.';
+  };
+
+  // Lock body scroll while loading
+  useEffect(() => {
+    if (showLoader) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showLoader]);
+
+  // Handle loader fade-out transition
+  useEffect(() => {
+    if (imagesLoaded && showLoader && !isFadingOut) {
+      setIsFadingOut(true);
+      const timer = setTimeout(() => {
+        setShowLoader(false);
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [imagesLoaded, showLoader, isFadingOut]);
 
   // Track viewport width changes (device rotation, resize)
   useEffect(() => {
@@ -92,7 +228,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
     for (let i = 1; i <= 49; i++) {
       const img = new Image();
       img.src = `/frames/frame_one/f1_${i}.jpg`;
-      const done = () => { count++; if (count === 49) setDesktopLoaded(true); };
+      const done = () => {
+        count++;
+        setDesktopLoadCount(count);
+        if (count === 49) setDesktopLoaded(true);
+      };
       img.onload = done;
       img.onerror = done;
       imgs.push(img);
@@ -107,7 +247,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
     for (let i = 1; i <= 50; i++) {
       const img = new Image();
       img.src = `/frames/frame_two/f2_${i}.jpg`;
-      const done = () => { count++; if (count === 50) setMobileLoaded(true); };
+      const done = () => {
+        count++;
+        setMobileLoadCount(count);
+        if (count === 50) setMobileLoaded(true);
+      };
       img.onload = done;
       img.onerror = done;
       imgs.push(img);
@@ -246,6 +390,49 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
 
   return (
     <div className="relative w-full min-h-screen bg-gradient-to-r from-[#d1d2cd] to-[#e5e9eb] text-slate-800 font-sans selection:bg-indigo-500 selection:text-white flex flex-col z-0">
+      {/* Premium Loader Screen */}
+      {showLoader && (
+        <div
+          className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-[#d1d2cd] to-[#e5e9eb] text-slate-900 font-sans select-none transition-opacity duration-500 ease-in-out ${
+            isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
+        >
+          {/* Glowing background circles for visual flair */}
+          <div className="absolute top-1/4 left-1/4 w-[350px] h-[350px] rounded-full blur-[100px] bg-indigo-500/10 pointer-events-none animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-[350px] h-[350px] rounded-full blur-[100px] bg-amber-500/10 pointer-events-none animate-pulse [animation-duration:4s]" />
+
+          <div className="z-10 flex flex-col items-center max-w-sm px-6 text-center space-y-8">
+            {/* Animated Logo Icon */}
+            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-extrabold text-3xl shadow-lg animate-bounce">
+              V
+            </div>
+
+            <div className="flex flex-col space-y-2">
+              <h1 className="text-3xl font-black tracking-[0.2em] uppercase text-slate-900 leading-none">
+                Veltrio
+              </h1>
+              <span className="text-[10px] font-extrabold uppercase tracking-[0.3em] text-indigo-600">
+                Communication Core
+              </span>
+            </div>
+
+            {/* Progress Bar & Status */}
+            <div className="w-64 flex flex-col items-center space-y-3">
+              <div className="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden border border-slate-300/30 shadow-inner">
+                <div
+                  className="h-full bg-gradient-to-r from-indigo-600 to-blue-600 rounded-full transition-all duration-300 ease-out"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+              <div className="w-full flex justify-between text-[10px] font-bold text-slate-500 tracking-[0.15em] uppercase font-mono">
+                <span className="truncate max-w-[170px] text-left">{getLoaderMessage(progressPercent)}</span>
+                <span>{progressPercent}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Translucent background glows */}
       <div className="fixed top-0 right-0 w-[450px] h-[450px] rounded-full blur-[130px] bg-amber-500/5 pointer-events-none z-10 animate-pulse [animation-duration:8s]" />
       <div className="fixed bottom-0 left-0 w-[450px] h-[450px] rounded-full blur-[130px] bg-orange-500/5 pointer-events-none z-10 animate-pulse [animation-duration:12s]" />
@@ -290,55 +477,59 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
 
         {/* Narrative Layer (z-10 depth coordinate) */}
         <div className="absolute inset-x-0 top-0 h-full z-10 pointer-events-none flex flex-col">
-          {STAGES.map((stage, index) => (
-            <div
-              key={stage.label}
-              className="w-full min-h-screen flex flex-col justify-between py-24 px-6 md:px-12 pointer-events-auto max-w-7xl mx-auto"
-            >
-              {/* Top HUD Row - Cyberpunk & Apple design specs */}
-              <div className="w-full flex justify-between items-start gap-4">
-                <span className="text-[9px] font-extrabold text-indigo-600 uppercase tracking-[0.25em] bg-indigo-50/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-indigo-100/60 font-mono shadow-sm shrink-0">
-                  {stage.label}
-                </span>
-                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-600 font-mono bg-white/70 backdrop-blur-md px-3 py-1 rounded-lg border border-slate-200/50 shadow-sm truncate">
-                  [ {stage.leftHUD} ]
-                </span>
-              </div>
+          {(isMobile ? MOBILE_STAGES : DESKTOP_STAGES).map((stage) => {
+            const isLeft = stage.align === 'left';
+            const isRight = stage.align === 'right';
+            const isCenter = stage.align === 'center';
+            return (
+              <div
+                key={stage.label}
+                className="w-full min-h-screen flex flex-col justify-between py-24 px-6 md:px-12 pointer-events-auto max-w-7xl mx-auto"
+              >
+                {/* Top HUD Row */}
+                <div className="w-full flex justify-between items-start gap-4">
+                  <span className="text-[9px] font-extrabold text-indigo-600 uppercase tracking-[0.25em] bg-indigo-50/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-indigo-100/60 font-mono shadow-sm shrink-0">
+                    {stage.label}
+                  </span>
+                  <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-600 font-mono bg-white/70 backdrop-blur-md px-3 py-1 rounded-lg border border-slate-200/50 shadow-sm truncate">
+                    [ {stage.leftHUD} ]
+                  </span>
+                </div>
 
-              {/* Story block - Alternating Left / Right aligned based on index to prevent centering overlap */}
-              <div className={`w-full flex-grow flex items-center ${index % 2 === 0 ? 'justify-start text-left' : 'justify-end text-right'
-                }`}>
-                <div className={`w-full max-w-xl flex flex-col space-y-6 md:space-y-8 py-12 ${index % 2 === 0 ? 'items-start' : 'items-end'
+                {/* Story block — positioned per stage.align */}
+                <div className={`w-full flex-grow flex items-center ${isLeft ? 'justify-start text-left' :
+                    isRight ? 'justify-end text-right' :
+                      'justify-center text-center'
                   }`}>
-                  <h2
-                    style={{ willChange: 'transform, opacity' }}
-                    className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-[0.2em] leading-normal text-slate-950 uppercase"
-                  >
-                    {stage.title}
-                  </h2>
-
-                  <p className="text-[10px] sm:text-xs md:text-sm text-slate-600 leading-[2.2] tracking-[0.18em] uppercase max-w-lg font-semibold">
-                    {stage.desc}
-                  </p>
-
-                  <div className="pt-4">
-                    <button
-                      onClick={onStart}
-                      className="px-8 py-4 sm:px-10 sm:py-5 rounded-2xl text-white font-extrabold text-[10px] sm:text-xs uppercase tracking-[0.25em] bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 hover:shadow-[0_4px_25px_rgba(79,70,229,0.35)] transform active:scale-98 transition-all duration-300 cursor-pointer shadow-md border-0"
+                  <div className={`w-full max-w-xl flex flex-col space-y-6 md:space-y-8 py-12 ${isLeft ? 'items-start' :
+                      isRight ? 'items-end' :
+                        'items-center'
+                    }`}>
+                    <h2
+                      style={{ willChange: 'transform, opacity' }}
+                      className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-[0.2em] leading-normal text-slate-950 uppercase"
                     >
-                      Launch Translation Hub
-                    </button>
+                      {stage.title}
+                    </h2>
+
+                    <p className="text-[10px] sm:text-xs md:text-sm text-slate-600 leading-[2.2] tracking-[0.18em] uppercase max-w-lg font-semibold">
+                      {stage.desc}
+                    </p>
+
+                    <div className="pt-4">
+
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Bottom HUD bar (Cyberpunk micro-typography styling) */}
-              <div className="w-full flex justify-between items-end border-t border-slate-300/40 pt-4 font-mono text-[9px] text-slate-500 tracking-[0.2em] uppercase font-extrabold gap-4">
-                <span className="truncate">Core Interface Sync</span>
-                <span className="truncate">{stage.rightHUD}</span>
+                {/* Bottom HUD bar */}
+                <div className="w-full flex justify-between items-end border-t border-slate-300/40 pt-4 font-mono text-[9px] text-slate-500 tracking-[0.2em] uppercase font-extrabold gap-4">
+                  <span className="truncate">{stage.bottomLeft}</span>
+                  <span className="truncate">{stage.rightHUD}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
       </div>
