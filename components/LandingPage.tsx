@@ -55,36 +55,64 @@ const STAGES: StageConfig[] = [
 const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imagesRef = useRef<HTMLImageElement[]>([]);
-  const [imagesLoaded, setImagesLoaded] = useState(false);
+
+  // Desktop frames: frame_one (49 landscape jpgs)
+  const desktopImagesRef = useRef<HTMLImageElement[]>([]);
+  const [desktopLoaded, setDesktopLoaded] = useState(false);
+
+  // Mobile frames: frame_two (50 portrait jpgs)
+  const mobileImagesRef = useRef<HTMLImageElement[]>([]);
+  const [mobileLoaded, setMobileLoaded] = useState(false);
+
+  // Track whether we are on a mobile-width viewport
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
 
   // Smooth LERP scrolling engine states
   const [lerpedProgress, setLerpedProgress] = useState(0);
   const targetProgressRef = useRef(0);
   const currentProgressRef = useRef(0);
 
-  // Preload all 49 image frames on mount
+  // Derived: which image set & total are currently active
+  const activeImagesRef = isMobile ? mobileImagesRef : desktopImagesRef;
+  const activeTotalFrames = isMobile ? 50 : 49;
+  const imagesLoaded = isMobile ? mobileLoaded : desktopLoaded;
+
+  // Track viewport width changes (device rotation, resize)
   useEffect(() => {
-    let loadedCount = 0;
-    const loadedImages: HTMLImageElement[] = [];
+    const mq = window.matchMedia('(max-width: 767px)');
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  // Preload desktop frames (frame_one, 49 frames)
+  useEffect(() => {
+    let count = 0;
+    const imgs: HTMLImageElement[] = [];
     for (let i = 1; i <= 49; i++) {
       const img = new Image();
-      img.src = `/frames/frame_one/frame 1 (${i}).jpg`;
-      img.onload = () => {
-        loadedCount++;
-        if (loadedCount === 49) {
-          setImagesLoaded(true);
-        }
-      };
-      img.onerror = () => {
-        loadedCount++;
-        if (loadedCount === 49) {
-          setImagesLoaded(true);
-        }
-      };
-      loadedImages.push(img);
+      img.src = `/frames/frame_one/f1_${i}.jpg`;
+      const done = () => { count++; if (count === 49) setDesktopLoaded(true); };
+      img.onload = done;
+      img.onerror = done;
+      imgs.push(img);
     }
-    imagesRef.current = loadedImages;
+    desktopImagesRef.current = imgs;
+  }, []);
+
+  // Preload mobile frames (frame_two, 50 frames)
+  useEffect(() => {
+    let count = 0;
+    const imgs: HTMLImageElement[] = [];
+    for (let i = 1; i <= 50; i++) {
+      const img = new Image();
+      img.src = `/frames/frame_two/f2_${i}.jpg`;
+      const done = () => { count++; if (count === 50) setMobileLoaded(true); };
+      img.onload = done;
+      img.onerror = done;
+      imgs.push(img);
+    }
+    mobileImagesRef.current = imgs;
   }, []);
 
   // Calculate scroll progress ratio (0 to 1) based on section container
@@ -132,20 +160,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
     return () => cancelAnimationFrame(rafId);
   }, []);
 
-  // Draw appropriate frame on canvas (using object-fit cover math to claim full viewport screen)
+  // Draw appropriate frame on canvas — picks desktop or mobile image set automatically
   const drawFrame = (progress: number) => {
     const canvas = canvasRef.current;
-    if (!canvas || !imagesLoaded || imagesRef.current.length === 0) return;
+    if (!canvas || !imagesLoaded || activeImagesRef.current.length === 0) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const totalFrames = 49;
+    const totalFrames = activeTotalFrames;
     const frameIndex = Math.min(
       totalFrames,
       Math.max(1, Math.floor(progress * (totalFrames - 1)) + 1)
     );
 
-    const img = imagesRef.current[frameIndex - 1];
+    const img = activeImagesRef.current[frameIndex - 1];
     if (!img || !img.complete) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -179,10 +207,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
     ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
   };
 
-  // Redraw canvas frame on scroll progress updates
+  // Redraw canvas frame on scroll progress or when active set changes
   useEffect(() => {
     drawFrame(lerpedProgress);
-  }, [lerpedProgress, imagesLoaded]);
+  }, [lerpedProgress, imagesLoaded, isMobile]);
 
   // Use a ResizeObserver to size the background canvas dynamically relative to viewport
   useEffect(() => {
@@ -214,7 +242,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
     return () => {
       resizeObserver.disconnect();
     };
-  }, [imagesLoaded]);
+  }, [imagesLoaded, isMobile]);
 
   return (
     <div className="relative w-full min-h-screen bg-gradient-to-r from-[#d1d2cd] to-[#e5e9eb] text-slate-800 font-sans selection:bg-indigo-500 selection:text-white flex flex-col z-0">

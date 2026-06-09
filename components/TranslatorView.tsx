@@ -163,15 +163,15 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
 
   // Run translation & sentiment
   useEffect(() => {
-    if (!debouncedInputText.trim()) { 
-      setTranslatedText(''); 
-      setSentiment(null); 
-      setError(''); 
-      setDetectedLanguage(''); 
+    if (!debouncedInputText.trim()) {
+      setTranslatedText('');
+      setSentiment(null);
+      setError('');
+      setDetectedLanguage('');
       setLanguageConfidence(0);
       setQualityScore(0);
       setClarityScore(0);
-      return; 
+      return;
     }
 
     const run = async () => {
@@ -236,11 +236,11 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
         setError('Failed to translate text. Please try again.');
       } else if (currentTranslation && currentSentiment) {
         const targetLanguageName = LANGUAGES.find(l => l.code === targetLanguage)?.name || '';
-        addToHistory({ 
-          inputText: debouncedInputText, 
-          translatedText: currentTranslation, 
-          sentiment: currentSentiment, 
-          targetLanguage, 
+        addToHistory({
+          inputText: debouncedInputText,
+          translatedText: currentTranslation,
+          sentiment: currentSentiment,
+          targetLanguage,
           targetLanguageName,
           languageConfidence: currentConf,
           qualityScore: currentQual,
@@ -261,7 +261,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = inputLanguage === 'auto' ? (navigator.language || 'en') : inputLanguage;
-    
+
     recognition.onstart = () => { setIsRecording(true); setError(''); };
     recognition.onresult = (event: any) => {
       let finalTranscript = '';
@@ -299,12 +299,12 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         stream.getTracks().forEach(t => t.stop());
         setAudioStream(null);
-        
+
         if (animationFrameRef.current) {
           cancelAnimationFrame(animationFrameRef.current);
         }
         if (audioContextRef.current) {
-          audioContextRef.current.close().catch(() => {});
+          audioContextRef.current.close().catch(() => { });
           audioContextRef.current = null;
         }
 
@@ -324,30 +324,30 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
         const analyser = audioContext.createAnalyser();
         analyser.fftSize = 256;
         source.connect(analyser);
-        
+
         audioContextRef.current = audioContext;
         analyserRef.current = analyser;
-        
+
         const bufferLength = analyser.fftSize;
         const dataArray = new Uint8Array(bufferLength);
         let lastSoundTime = Date.now();
-        
+
         const checkSilence = () => {
           if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') return;
           analyser.getByteTimeDomainData(dataArray);
-          
+
           let sum = 0;
           for (let i = 0; i < bufferLength; i++) {
             const deviation = (dataArray[i] - 128) / 128;
             sum += deviation * deviation;
           }
           const rms = Math.sqrt(sum / bufferLength);
-          
+
           const threshold = 0.015;
           if (rms > threshold) {
             lastSoundTime = Date.now();
           }
-          
+
           if (Date.now() - lastSoundTime > 3000) { // 3-second pause auto-termination
             console.log("Silence auto-termination triggered. Stopping recording.");
             stopWhisperRecording();
@@ -355,7 +355,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
             animationFrameRef.current = requestAnimationFrame(checkSilence);
           }
         };
-        
+
         animationFrameRef.current = requestAnimationFrame(checkSilence);
       } catch (vadErr) {
         console.error("VAD initialization failed:", vadErr);
@@ -453,7 +453,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
       mediaRecorderRef.current.stream.getTracks().forEach(t => t.stop());
     }
     if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-    if (audioContextRef.current) audioContextRef.current.close().catch(() => {});
+    if (audioContextRef.current) audioContextRef.current.close().catch(() => { });
   }, []);
   useEffect(() => { if (isSpeaking) { window.speechSynthesis.cancel(); audioRef.current?.pause(); setIsSpeaking(false); } }, [translatedText]);
 
@@ -483,10 +483,10 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
     <>
       {/* Left Column - Decryptor Workspace (70%) */}
       <div className="col-span-full lg:col-span-7 flex flex-col gap-6">
-        
+
         {/* Settings Control Panel */}
         <div className="cyber-terminal p-4 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-          
+
           {/* Translator Mode dynamic selector */}
           <div className="flex items-center gap-2 self-start sm:self-center">
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Engine:</span>
@@ -540,7 +540,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
 
           {/* Input box */}
           <div className={`container-query-parent relative group flex flex-col min-h-[300px] cyber-terminal transition-all duration-300 responsive-card ${style.focusRing}`}>
-            
+
             <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50">
               <div className="flex items-center gap-2">
                 <span className={`w-2.5 h-2.5 rounded-full bg-${style.primary} animate-pulse`} />
@@ -549,9 +549,9 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
                 </span>
               </div>
               {inputText && (
-                <button 
-                  onClick={() => { setInputText(''); setTranslatedText(''); setSentiment(null); setError(''); textareaRef.current?.focus(); }} 
-                  className="text-slate-400 hover:text-red-500 p-1 rounded-lg hover:bg-red-50 transition-colors cursor-pointer" 
+                <button
+                  onClick={() => { setInputText(''); setTranslatedText(''); setSentiment(null); setError(''); textareaRef.current?.focus(); }}
+                  className="text-slate-400 hover:text-red-500 p-1 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
                   title="Clear content"
                 >
                   <CloseIcon className="w-4 h-4" />
@@ -576,11 +576,10 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
                 )}
                 <button
                   onClick={handleToggleRecording}
-                  className={`p-3 rounded-xl transition-all duration-300 shadow-md ${
-                    isRecording || isWhisperRecording
+                  className={`p-3 rounded-xl transition-all duration-300 shadow-md ${isRecording || isWhisperRecording
                       ? 'bg-red-600 text-white scale-105'
                       : `cyber-button-${translationMode === 'native' ? 'pink' : translationMode === 'industrial' ? 'cyan' : 'pink'} rounded-xl`
-                  } cursor-pointer`}
+                    } cursor-pointer`}
                   title={isRecording || isWhisperRecording ? 'Stop Recording' : 'Voice Input'}
                 >
                   {isRecording || isWhisperRecording ? <StopIcon className="w-5 h-5" /> : <MicrophoneIcon className="w-5 h-5" />}
@@ -591,7 +590,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
 
           {/* Output box */}
           <div className="container-query-parent relative flex flex-col min-h-[300px] cyber-terminal transition-all duration-300 responsive-card">
-            
+
             <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50">
               <div className="flex items-center gap-2">
                 <span className={`w-2.5 h-2.5 rounded-full bg-${style.accent} animate-pulse`} />
@@ -664,19 +663,19 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
                 <HistoryIcon className="w-4 h-4 text-slate-500" />
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-700 font-sans">Translation History</span>
               </div>
-              <button 
-                onClick={clearHistory} 
+              <button
+                onClick={clearHistory}
                 className="text-xs font-semibold text-red-600 hover:text-red-700 px-3 py-1.5 border border-slate-200 bg-white hover:bg-slate-50 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
                 <TrashIcon className="w-3.5 h-3.5" /> Clear History
               </button>
             </div>
-            
+
             <div className="p-6">
               <div className="relative border-l-2 border-slate-100 ml-3 pl-6 space-y-6">
                 {history.map((item) => (
-                  <div 
-                    key={item.id} 
+                  <div
+                    key={item.id}
                     className="relative group cursor-pointer animate-in fade-in duration-300"
                     onClick={() => loadFromHistory(item)}
                   >
@@ -699,7 +698,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
                         <p className="text-xs text-slate-500 truncate font-sans">{item.inputText}</p>
                         <p className="text-sm font-semibold text-slate-800 mt-0.5 font-sans">{item.translatedText}</p>
                       </div>
-                      
+
                       <div className="flex items-center gap-3 flex-shrink-0 self-end sm:self-center">
                         {item.sentiment && (
                           <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white border border-slate-200 text-[10px] font-bold text-slate-600 shadow-sm font-sans">
@@ -707,7 +706,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
                             <span className="capitalize">{item.sentiment.sentiment}</span>
                           </div>
                         )}
-                        
+
                         <button
                           onClick={e => { e.stopPropagation(); deleteHistoryItem(item.id); }}
                           className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-red-500 shadow-sm transition-all cursor-pointer"
@@ -726,7 +725,15 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
 
       {/* Right Column - AI Insights (30%) */}
       <div className="col-span-full lg:col-span-3 flex flex-col gap-6">
-        
+
+        {/* Frame Preview — desktop: landscape frame_one, mobile: portrait frame_two */}
+        <div className="hidden md:block">
+          <FramePlayer frameFolder="frame_one" className="w-full" />
+        </div>
+        <div className="block md:hidden">
+          <FramePlayer frameFolder="frame_two" className="w-full max-w-xs mx-auto" />
+        </div>
+
         {/* Detection Confidence Card */}
         {detectedLanguage && inputLanguage === 'auto' && (
           <div className="cyber-terminal p-4 flex items-center justify-between bg-white border border-slate-200 rounded-xl shadow-sm">
@@ -758,7 +765,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
                     <span className="text-sm font-extrabold text-slate-800">{pct}%</span>
                   </div>
                   <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <div 
+                    <div
                       className={`h-full bg-gradient-to-r ${stat.color} transition-all duration-700`}
                       style={{ width: `${pct}%` }}
                     />
@@ -778,22 +785,6 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
           <div className="p-5 bg-transparent">
             <SentimentDisplay sentimentResult={sentiment} isLoading={isAnalyzingSentiment} />
           </div>
-        </div>
-
-        {/* Dynamic Video Guide Walkthrough */}
-        <div className="cyber-terminal bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-          <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Live Translation Walkthrough</h4>
-          <video
-            src="/trail.mp4"
-            controls
-            playsInline
-            preload="metadata"
-            className="w-full rounded-lg overflow-hidden border border-slate-100 shadow-sm"
-            style={{ display: 'block' }}
-          />
-          <p className="text-[11px] text-slate-500 mt-3 leading-relaxed">
-            Click the play button to see how the system captures voices, draws real-time wave signals, and translates speech on the fly.
-          </p>
         </div>
       </div>
     </>
