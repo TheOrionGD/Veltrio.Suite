@@ -154,12 +154,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   // Desktop frames: frame_one (49 landscape jpgs)
   const desktopImagesRef = useRef<HTMLImageElement[]>([]);
   const [desktopLoaded, setDesktopLoaded] = useState(false);
-  const [desktopLoadCount, setDesktopLoadCount] = useState(0);
 
   // Mobile frames: frame_two (50 portrait jpgs)
   const mobileImagesRef = useRef<HTMLImageElement[]>([]);
   const [mobileLoaded, setMobileLoaded] = useState(false);
-  const [mobileLoadCount, setMobileLoadCount] = useState(0);
 
   // Track whether we are on a mobile-width viewport
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
@@ -169,49 +167,63 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   const targetProgressRef = useRef(0);
   const currentProgressRef = useRef(0);
 
-  // Loader states
-  const [showLoader, setShowLoader] = useState(true);
-  const [isFadingOut, setIsFadingOut] = useState(false);
-
   // Derived: which image set & total are currently active
   const activeImagesRef = isMobile ? mobileImagesRef : desktopImagesRef;
   const activeTotalFrames = isMobile ? 50 : 49;
   const imagesLoaded = isMobile ? mobileLoaded : desktopLoaded;
 
-  const progressPercent = isMobile
-    ? Math.round((mobileLoadCount / 50) * 100)
-    : Math.round((desktopLoadCount / 49) * 100);
+  // Loader states
+  const [loaderProgress, setLoaderProgress] = useState(0);
+  const [loaderText, setLoaderText] = useState('Initializing systems...');
+  const [showLoader, setShowLoader] = useState(true);
 
-  const getLoaderMessage = (percent: number) => {
-    if (percent < 20) return 'Establishing secure connection...';
-    if (percent < 50) return 'Caching visual frame sequences...';
-    if (percent < 80) return 'Initializing cognitive layers...';
-    if (percent < 100) return 'Syncing audio interfaces...';
-    return 'Core interface online.';
-  };
-
-  // Lock body scroll while loading
+  // Minimum 5 seconds loading timer
   useEffect(() => {
-    if (showLoader) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [showLoader]);
+    const duration = 5000; // 5000ms
+    const interval = 50; // Update every 50ms
+    const totalSteps = duration / interval;
+    let currentStep = 0;
 
-  // Handle loader fade-out transition
+    const phrases = [
+      'Loading neural assets...',
+      'Initializing acoustic capture pipeline...',
+      'Configuring LLM context models...',
+      'Preloading high-fidelity frame buffer...',
+      'Calibrating real-time translation matrix...',
+      'Establishing semantic alignment stack...',
+      'Veltrio Core online.'
+    ];
+
+    const timer = setInterval(() => {
+      currentStep++;
+      const progress = Math.min(100, Math.floor((currentStep / totalSteps) * 100));
+      setLoaderProgress(progress);
+
+      // Choose phrase based on progress
+      const phraseIndex = Math.min(
+        phrases.length - 1,
+        Math.floor((progress / 100) * phrases.length)
+      );
+      setLoaderText(phrases[phraseIndex]);
+
+      if (progress >= 100) {
+        clearInterval(timer);
+      }
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const isReady = loaderProgress === 100 && imagesLoaded;
+
   useEffect(() => {
-    if (imagesLoaded && showLoader && !isFadingOut) {
-      setIsFadingOut(true);
-      const timer = setTimeout(() => {
+    if (isReady) {
+      const timeout = setTimeout(() => {
         setShowLoader(false);
       }, 600);
-      return () => clearTimeout(timer);
+      return () => clearTimeout(timeout);
     }
-  }, [imagesLoaded, showLoader, isFadingOut]);
+  }, [isReady]);
 
   // Track viewport width changes (device rotation, resize)
   useEffect(() => {
@@ -228,11 +240,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
     for (let i = 1; i <= 49; i++) {
       const img = new Image();
       img.src = `/frames/frame_one/f1_${i}.jpg`;
-      const done = () => {
-        count++;
-        setDesktopLoadCount(count);
-        if (count === 49) setDesktopLoaded(true);
-      };
+      const done = () => { count++; if (count === 49) setDesktopLoaded(true); };
       img.onload = done;
       img.onerror = done;
       imgs.push(img);
@@ -247,11 +255,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
     for (let i = 1; i <= 50; i++) {
       const img = new Image();
       img.src = `/frames/frame_two/f2_${i}.jpg`;
-      const done = () => {
-        count++;
-        setMobileLoadCount(count);
-        if (count === 50) setMobileLoaded(true);
-      };
+      const done = () => { count++; if (count === 50) setMobileLoaded(true); };
       img.onload = done;
       img.onerror = done;
       imgs.push(img);
@@ -390,44 +394,48 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
 
   return (
     <div className="relative w-full min-h-screen bg-gradient-to-r from-[#d1d2cd] to-[#e5e9eb] text-slate-800 font-sans selection:bg-indigo-500 selection:text-white flex flex-col z-0">
-      {/* Premium Loader Screen */}
+      {/* Premium Loader Overlay */}
       {showLoader && (
         <div
-          className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-[#d1d2cd] to-[#e5e9eb] text-slate-900 font-sans select-none transition-opacity duration-500 ease-in-out ${
-            isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
-          }`}
+          className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#090d16] text-white transition-opacity duration-1000 ${isReady ? 'opacity-0 pointer-events-none' : 'opacity-100'
+            }`}
         >
-          {/* Glowing background circles for visual flair */}
-          <div className="absolute top-1/4 left-1/4 w-[350px] h-[350px] rounded-full blur-[100px] bg-indigo-500/10 pointer-events-none animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-[350px] h-[350px] rounded-full blur-[100px] bg-amber-500/10 pointer-events-none animate-pulse [animation-duration:4s]" />
+          {/* Subtle background grid pattern */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20" />
 
-          <div className="z-10 flex flex-col items-center max-w-sm px-6 text-center space-y-8">
-            {/* Animated Logo Icon */}
-            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-extrabold text-3xl shadow-lg animate-bounce">
-              V
-            </div>
-
-            <div className="flex flex-col space-y-2">
-              <h1 className="text-3xl font-black tracking-[0.2em] uppercase text-slate-900 leading-none">
-                Veltrio
-              </h1>
-              <span className="text-[10px] font-extrabold uppercase tracking-[0.3em] text-indigo-600">
-                Communication Core
-              </span>
-            </div>
-
-            {/* Progress Bar & Status */}
-            <div className="w-64 flex flex-col items-center space-y-3">
-              <div className="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden border border-slate-300/30 shadow-inner">
-                <div
-                  className="h-full bg-gradient-to-r from-indigo-600 to-blue-600 rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${progressPercent}%` }}
+          <div className="relative z-10 flex flex-col items-center max-w-md w-full px-8 text-center space-y-8">
+            {/* Pulsing Glowing Logo */}
+            <div className="relative">
+              <div className="absolute -inset-4 bg-indigo-500/30 rounded-2xl blur-xl animate-pulse" />
+              <div className="relative w-16 h-16 bg-gradient-to-br from-indigo-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-2xl p-2.5">
+                <img
+                  src="/logo.png"
+                  alt="Veltrio Logo"
+                  className="w-full h-full object-contain animate-pulse"
                 />
               </div>
-              <div className="w-full flex justify-between text-[10px] font-bold text-slate-500 tracking-[0.15em] uppercase font-mono">
-                <span className="truncate max-w-[170px] text-left">{getLoaderMessage(progressPercent)}</span>
-                <span>{progressPercent}%</span>
-              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold tracking-[0.2em] uppercase text-white">
+                Veltrio Core
+              </h2>
+              <p className="text-[10px] uppercase tracking-[0.3em] text-emerald-400 font-mono font-bold animate-pulse">
+                {loaderText}
+              </p>
+            </div>
+
+            {/* Glowing Loading Bar */}
+            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700/50 shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]">
+              <div
+                className="h-full bg-gradient-to-r from-indigo-500 via-teal-400 to-emerald-500 rounded-full transition-all duration-75 shadow-[0_0_12px_#10b981]"
+                style={{ width: `${loaderProgress}%` }}
+              />
+            </div>
+
+            <div className="flex justify-between items-center w-full text-[10px] font-mono text-slate-400 uppercase tracking-widest">
+              <span>INITIALIZING</span>
+              <span className="text-emerald-400 font-bold">{loaderProgress}%</span>
             </div>
           </div>
         </div>
@@ -472,12 +480,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
             className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
           />
           {/* Translucent separator overlay (z-5) set to 20% white opacity matching frame analysis */}
-          <div className="absolute inset-0 bg-white/20 z-5 pointer-events-none" />
+          <div className="absolute inset-0 bg-white/05 z-5 pointer-events-none" />
         </div>
 
         {/* Narrative Layer (z-10 depth coordinate) */}
         <div className="absolute inset-x-0 top-0 h-full z-10 pointer-events-none flex flex-col">
-          {(isMobile ? MOBILE_STAGES : DESKTOP_STAGES).map((stage) => {
+          {(isMobile ? MOBILE_STAGES : DESKTOP_STAGES).map((stage, index) => {
+            const activeStages = isMobile ? MOBILE_STAGES : DESKTOP_STAGES;
+            const isLastStage = index === activeStages.length - 1;
             const isLeft = stage.align === 'left';
             const isRight = stage.align === 'right';
             const isCenter = stage.align === 'center';
@@ -488,44 +498,46 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               >
                 {/* Top HUD Row */}
                 <div className="w-full flex justify-between items-start gap-4">
-                  <span className="text-[9px] font-extrabold text-indigo-600 uppercase tracking-[0.25em] bg-indigo-50/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-indigo-100/60 font-mono shadow-sm shrink-0">
+                  <span className="text-[9px] font-extrabold uppercase tracking-[0.25em] bg-black/40 backdrop-blur-[6px] px-3.5 py-1.5 rounded-full border border-indigo-500/30 font-mono shadow-sm shrink-0 text-secondary-outline">
                     {stage.label}
                   </span>
-                  <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-600 font-mono bg-white/70 backdrop-blur-md px-3 py-1 rounded-lg border border-slate-200/50 shadow-sm truncate">
+                  <span className="text-[9px] font-bold uppercase tracking-[0.2em] font-mono bg-black/40 backdrop-blur-[6px] px-3 py-1 rounded-lg border border-indigo-500/30 shadow-sm truncate text-secondary-outline">
                     [ {stage.leftHUD} ]
                   </span>
                 </div>
 
                 {/* Story block — positioned per stage.align */}
-                <div className={`w-full flex-grow flex items-center ${isLeft ? 'justify-start text-left' :
-                    isRight ? 'justify-end text-right' :
-                      'justify-center text-center'
+                <div className={`w-full flex-grow flex ${isLastStage
+                  ? 'items-end pb-16 justify-center text-center'
+                  : `items-center ${isLeft ? 'justify-start text-left' : isRight ? 'justify-end text-right' : 'justify-center text-center'}`
                   }`}>
-                  <div className={`w-full max-w-xl flex flex-col space-y-6 md:space-y-8 py-12 ${isLeft ? 'items-start' :
-                      isRight ? 'items-end' :
-                        'items-center'
+                  <div className={`w-full flex flex-col p-8 sm:p-10 rounded-[24px] border border-white/40 backdrop-blur-[6px] bg-white/45 shadow-[0_8px_32px_0_rgba(15,23,42,0.05)] ${isLastStage
+                    ? 'items-center max-w-4xl space-y-4 text-center'
+                    : `space-y-4 md:space-y-6 ${isLeft ? 'items-start max-w-2xl text-left' : isRight ? 'items-end max-w-2xl text-right' : 'items-center max-w-2xl text-center'}`
                     }`}>
                     <h2
                       style={{ willChange: 'transform, opacity' }}
-                      className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-[0.2em] leading-normal text-slate-950 uppercase"
+                      className={`font-black tracking-[0.05em] uppercase text-slate-950 leading-tight ${isLastStage
+                        ? 'text-lg sm:text-xl md:text-2xl lg:text-3xl xl:whitespace-nowrap'
+                        : 'text-xl sm:text-2xl md:text-3xl lg:text-[40px]'
+                        }`}
                     >
                       {stage.title}
                     </h2>
 
-                    <p className="text-[10px] sm:text-xs md:text-sm text-slate-600 leading-[2.2] tracking-[0.18em] uppercase max-w-lg font-semibold">
+                    <p className={`tracking-[0.05em] uppercase font-semibold text-secondary-outline ${isLastStage
+                      ? 'text-[8px] sm:text-[9px] md:text-xs xl:whitespace-nowrap max-w-none'
+                      : 'text-[11px] sm:text-xs md:text-sm leading-relaxed max-w-xl'
+                      }`}>
                       {stage.desc}
                     </p>
-
-                    <div className="pt-4">
-
-                    </div>
                   </div>
                 </div>
 
                 {/* Bottom HUD bar */}
-                <div className="w-full flex justify-between items-end border-t border-slate-300/40 pt-4 font-mono text-[9px] text-slate-500 tracking-[0.2em] uppercase font-extrabold gap-4">
-                  <span className="truncate">{stage.bottomLeft}</span>
-                  <span className="truncate">{stage.rightHUD}</span>
+                <div className="w-full flex justify-between items-end border-t border-indigo-500/30 pt-4 font-mono text-[9px] tracking-[0.2em] uppercase font-extrabold gap-4">
+                  <span className="truncate text-secondary-outline">{stage.bottomLeft}</span>
+                  <span className="truncate text-secondary-outline">{stage.rightHUD}</span>
                 </div>
               </div>
             );
