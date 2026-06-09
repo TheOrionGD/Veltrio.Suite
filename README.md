@@ -194,7 +194,7 @@ sequenceDiagram
 The application UI is structured as an interactive cockpit, splitting functionality across primary views, background widgets, and visual helpers.
 
 ### LandingPage Component
-Renders the initial startup sequence and intro portal. It simulates a boot terminal output loader that displays neural modules being initialized. It lists the hackathon developers and introduces the platform's core problem statement and proposed solution.
+Renders the initial startup sequence and interactive scrollytelling intro portal.
 *   **Properties Interface:**
     ```typescript
     interface LandingPageProps {
@@ -203,8 +203,13 @@ Renders the initial startup sequence and intro portal. It simulates a boot termi
       toggleTheme: () => void;  // Function to cycle design variables
     }
     ```
-*   **Key Logic:** Simulates asynchronous loading logs using timeouts. Scrolls the user viewport to top positions during startup. Locks scrolling constraints when the main application dashboard launches.
-*   **Visual Highlights:** Glowing logo blocks, futuristic text, dual-column terminal panels showing Problem Statement and Proposed Solutions, and developer rank descriptors.
+*   **Key Logic & Systems:**
+    *   **Interactive Scrollytelling:** Binds a background canvas that draws high-resolution video frames driven by scroll position. Preloads 49 landscape frames (`frame_one`) for desktop view and 50 portrait frames (`frame_two`) for mobile.
+    *   **Smooth Scroll Inertia (LERP):** Interpolates user scroll triggers using a requestAnimationFrame loop with inertia parameters (0.08 on desktop, 0.16 on mobile) to create a premium, lag-free visual flow.
+    *   **5-Second System Loader:** Renders a gorgeous full-screen preloading deck with a progress indicator counting up to 100% over a minimum of 5 seconds. Uses the application's favicon (`/logo.png`) as a pulsing animated loader symbol and cycles console phrases (e.g. *Initializing acoustic capture...*). Fades out smoothly only after the 5-second timer completes and all active frame assets are fully cached in browser memory.
+    *   **Glassmorphic Story Panels:** Wraps text overlays in premium glass cards with a subtle border and 6px backdrop blur, making content highly readable over dynamic backgrounds.
+    *   **Layout Optimizations:** Automatically checks screen sizes to switch stage texts, shifts the final stage's title into a straight line to keep the background Veltrio logo fully visible, and limits device pixel ratio (DPR) on mobile to 1x to avoid GPU rendering lag.
+*   **Visual Highlights:** Pulsing favicon loader, custom gradient loading bar, responsive glass cards, scroll-bound canvas frames, and straight-line bottom titles.
 
 ### TranslatorView Component
 The main translation control deck. Allows users to translate typed text or recorded speech.
@@ -310,6 +315,7 @@ Veltrio-EnterpriseSuite/
 ├── components/           # Core user interface modules
 │   ├── ChatbotWidget.tsx      # Sub-CPU co-pilot panel
 │   ├── ConversationView.tsx   # Voice-to-voice communication room
+│   ├── FramePlayer.tsx        # Loop-based frame sequence preview player
 │   ├── icons.tsx              # SVG vector graphics library
 │   ├── LandingPage.tsx        # System launch interface
 │   ├── SentimentDisplay.tsx   # Sentiment indicator HUD
@@ -690,7 +696,10 @@ By replacing separate HuggingFace engines with a single, unified Groq architectu
 ### 2. Front-End Optimizations
 *   **Asynchronous Processing:** Transcription, translation, and sentiment analyses are dispatched concurrently via decoupled async triggers.
 *   **Request Interceptors (AbortController):** Every fetch payload uses a timeout trigger. If a TTS generation exceeds 2 seconds, the request is aborted and the system falls back to the browser's speech synthesis engine, ensuring uninterrupted playback.
-*   **Asset Bundling:** Since Tailwind v4 compiles css rules on build step, the production css artifact contains zero unused style strings. Sub-components are loaded dynamically under lazy structures when needed.
+*   **Mobile Canvas & DPI Capping:** The scrollytelling background canvas caps device pixel ratio (DPR) at `1x` on mobile viewports. This bypasses the heavy rendering cost of drawing high-resolution video frames at 3x or 4x DPR on Retina/AMOLED displays, reducing GPU rendering overhead by 9x.
+*   **Fixed Canvas Viewport:** Replaced the sticky canvas wrapper with a `fixed` viewport positioning box (`fixed top-0 left-0 w-full h-screen`). This prevents scroll stickiness bugs common to mobile Chrome and iOS Safari.
+*   **Dynamic LERP Scroll Easing:** The scroll animation loop scales ease speed dynamically from `0.08` (desktop, for smooth inertia drag) to `0.16` (mobile, for responsive real-time touch feedback).
+*   **Asset Bundling:** Since Tailwind v4 compiles CSS rules on the build step, the production CSS artifact contains zero unused style strings. Sub-components are loaded dynamically under lazy structures when needed.
 
 ---
 

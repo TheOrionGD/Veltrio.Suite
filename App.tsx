@@ -3,165 +3,224 @@ import TranslatorView from './components/TranslatorView';
 import ConversationView from './components/ConversationView';
 import LandingPage from './components/LandingPage';
 import ChatbotWidget from './components/ChatbotWidget';
+import CommandPalette from './components/CommandPalette';
 
 const App: React.FC = () => {
   const [showLanding, setShowLanding] = useState(true);
   const [mode, setMode] = useState<'translator' | 'conversation'>('translator');
-  const [isAssistantOpen, setIsAssistantOpen] = useState(true);
+  
+  // Workspace States managed at App root for Command Palette access
+  const [inputLanguage, setInputLanguage] = useState<string>('auto');
+  const [targetLanguage, setTargetLanguage] = useState<string>('es');
+  const [translationMode, setTranslationMode] = useState<'native' | 'industrial' | 'customer'>('industrial');
+  const [clearHistoryTrigger, setClearHistoryTrigger] = useState<number>(0);
+
+  // Layout UI States
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [assistantContextPrompt, setAssistantContextPrompt] = useState<string>('');
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    try {
+      return (localStorage.getItem('theme') as 'dark' | 'light') || 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
+  // Sync theme class to HTML node
   useEffect(() => {
-    // Force light-theme only, disable dark classes
-    document.documentElement.classList.remove('dark');
+    const root = document.documentElement;
+    if (theme === 'light') {
+      root.classList.add('light');
+      root.classList.remove('dark');
+    } else {
+      root.classList.add('dark');
+      root.classList.remove('light');
+    }
+    try {
+      localStorage.setItem('theme', theme);
+    } catch {}
+  }, [theme]);
+
+  // Command palette listener (Cmd+K or Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
-
-
 
   const handleAskAssistant = (prompt: string) => {
     setIsAssistantOpen(true);
     setAssistantContextPrompt(prompt);
   };
 
+  const handleClearHistory = () => {
+    // Clear Local Storage items for history
+    try {
+      localStorage.removeItem('translationHistory');
+      setClearHistoryTrigger(prev => prev + 1);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleToggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
   if (showLanding) {
-    return <LandingPage onStart={() => setShowLanding(false)} theme="light" toggleTheme={() => {}} />;
+    return (
+      <LandingPage 
+        onStart={() => setShowLanding(false)} 
+        theme={theme} 
+        toggleTheme={handleToggleTheme} 
+      />
+    );
   }
 
   return (
-    <div className="cyber-container min-h-screen text-foreground font-sans app-shell-grid">
-      {/* Header */}
-      <header className="sticky top-0 z-30 w-full bg-white border-b border-slate-200 shadow-sm flex-shrink-0">
-        <div className="max-w-full mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+    <div className="relative min-h-screen text-foreground select-none overflow-x-hidden flex flex-col font-sans transition-colors duration-500">
+      
+      {/* Immersive Floating Ambient Light Elements */}
+      <div className="ambient-bg">
+        <div 
+          className="ambient-glow bg-gradient-to-tr from-indigo-500/25 via-purple-500/20 to-emerald-500/20 animate-float-slow"
+          style={{ transform: `translate(${(mode === 'conversation' ? 10 : -10)}%, ${(mode === 'conversation' ? 5 : -5)}%)` }}
+        />
+      </div>
 
-          {/* Logo */}
-          <div className="flex items-center gap-2.5 flex-shrink-0">
-            <img
-              src="/logo.png"
-              alt="Veltrio Logo"
-              className="w-8 h-8 object-contain bg-slate-50 p-0.5 rounded-lg border border-slate-100"
+      {/* Main Workspace Stage - Boundary-less Content Layout */}
+      <main className="flex-grow w-full max-w-7xl mx-auto px-6 pt-12 pb-32 flex flex-col justify-center items-center z-10">
+        <div className="w-full flex-grow flex items-center justify-center fade-in-up">
+          {mode === 'translator' ? (
+            <TranslatorView 
+              onAskAssistant={handleAskAssistant} 
+              inputLanguage={inputLanguage}
+              setInputLanguage={setInputLanguage}
+              targetLanguage={targetLanguage}
+              setTargetLanguage={setTargetLanguage}
+              translationMode={translationMode}
+              setTranslationMode={setTranslationMode}
+              clearHistoryTrigger={clearHistoryTrigger}
             />
-            <div className="flex flex-col">
-              <span className="text-lg font-extrabold tracking-tight text-slate-900 leading-none">
-                Veltrio
-              </span>
-              <span className="text-[9px] font-bold text-indigo-600 tracking-wider leading-none mt-1 hidden sm:inline uppercase">
-                Enterprise Translation Hub
-              </span>
-            </div>
-          </div>
+          ) : (
+            <ConversationView 
+              onAskAssistant={handleAskAssistant}
+              inputLanguage={inputLanguage}
+              setInputLanguage={setInputLanguage}
+              clearHistoryTrigger={clearHistoryTrigger}
+            />
+          )}
+        </div>
+      </main>
 
-          {/* Desktop Mode Switcher - Centered in Header */}
-          <div className="hidden md:flex bg-slate-100 border border-slate-200 p-0.5 rounded-lg font-sans">
-            {[
-              { id: 'translator', label: 'Translator Dashboard' },
-              { id: 'conversation', label: 'Live Voice Mode' }
-            ].map(item => (
-              <button
-                key={item.id}
-                onClick={() => setMode(item.id as any)}
-                className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 cursor-pointer ${mode === item.id
-                    ? 'bg-white text-indigo-600 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
-                  }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Clean SaaS header options */}
-          <div className="flex items-center gap-2.5 flex-shrink-0">
-            {/* Professional Status Badge */}
-            <span className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 border border-indigo-100 text-[10px] font-bold text-indigo-600 rounded-lg bg-indigo-50 font-sans uppercase">
-              Professional SaaS Active
-            </span>
-
-            {/* Toggle Assistant */}
+      {/* Contextual Floating Actions Navigation Dock */}
+      <div className="floating-dock-container">
+        <nav className="glass-pill px-6 py-3 flex items-center gap-6 shadow-[0_12px_40px_rgba(0,0,0,0.5)] border border-white/10 hover:border-white/20 transition-all duration-300">
+          
+          {/* Mode Segment Selectors */}
+          <div className="flex items-center gap-1.5 bg-white/5 p-1 rounded-xl border border-white/5">
             <button
-              onClick={() => setIsAssistantOpen(prev => !prev)}
-              className={`px-4 py-2 border rounded-lg font-bold text-xs flex items-center gap-2 transition-all cursor-pointer font-sans ${isAssistantOpen
-                  ? 'bg-indigo-50 border-indigo-300 text-indigo-700 shadow-sm'
-                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                }`}
+              onClick={() => setMode('translator')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold hover-scale flex items-center gap-2 cursor-pointer transition-all ${
+                mode === 'translator'
+                  ? 'bg-indigo-600 text-white shadow-md font-bold'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+              title="Written Link (Text & Files)"
             >
-              ✨ AI Assistant {isAssistantOpen ? 'Active' : 'Standby'}
+              <span>📝</span>
+              <span className="hidden sm:inline">Written Link</span>
+            </button>
+            
+            <button
+              onClick={() => setMode('conversation')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold hover-scale flex items-center gap-2 cursor-pointer transition-all ${
+                mode === 'conversation'
+                  ? 'bg-indigo-600 text-white shadow-md font-bold'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+              title="Voice Link (Speech Chat)"
+            >
+              <span>🎙️</span>
+              <span className="hidden sm:inline">Voice Link</span>
             </button>
           </div>
-        </div>
-      </header>
 
-      {/* Main Workspace Layout */}
-      <div className="flex-grow flex flex-col relative z-10 w-full">
+          <div className="w-px h-5 bg-white/10" />
 
-        {/* Workspace Stage Panel */}
-        <main className="flex-grow p-4 md:p-6 flex flex-col w-full bg-slate-50/50">
+          {/* Quick Actions & Overlay Triggers */}
+          <div className="flex items-center gap-4">
+            
+            {/* Command Palette Button */}
+            <button
+              onClick={() => setIsCommandPaletteOpen(true)}
+              className="p-2 rounded-xl text-zinc-400 hover:text-zinc-200 hover:bg-white/5 border border-transparent hover:border-white/5 hover-scale cursor-pointer flex items-center gap-1.5 text-xs font-semibold transition-all"
+              title="Open Command Palette (Cmd+K)"
+            >
+              <span>🔍</span>
+              <span className="hidden md:inline font-mono text-[9px] bg-white/10 border border-white/10 px-1.5 py-0.5 rounded text-zinc-400 font-bold">⌘K</span>
+            </button>
 
-          {/* Mobile navigation tab bar (visible on tablet/mobile only) */}
-          <div className="md:hidden flex justify-center mb-4 flex-shrink-0 font-sans">
-            <div className="bg-slate-100 border border-slate-200 p-0.5 rounded-lg inline-flex">
-              {[
-                { id: 'translator', label: 'Translator' },
-                { id: 'conversation', label: 'Live Voice' }
-              ].map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => setMode(t.id as any)}
-                  className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 cursor-pointer ${mode === t.id
-                      ? 'bg-white text-indigo-600 shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="workspace-stage-grid flex-grow">
-            {mode === 'translator' ? (
-              <TranslatorView onAskAssistant={handleAskAssistant} />
-            ) : (
-              <ConversationView onAskAssistant={handleAskAssistant} />
-            )}
-          </div>
-        </main>
-
-        {/* Floating AI Helper Chat Panel & FAB Trigger */}
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 font-sans">
-          {/* Floating Chat Window */}
-          {isAssistantOpen && (
-            <div className="shadow-xl rounded-xl border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
-              <ChatbotWidget
-                isInline={false} // Renders with fixed dimensions: w-[calc(100vw-2rem)] max-w-[360px] h-[500px]
-                isOpen={isAssistantOpen}
-                onClose={() => setIsAssistantOpen(false)}
-                contextPrompt={assistantContextPrompt}
-                clearContextPrompt={() => setAssistantContextPrompt('')}
-              />
-            </div>
-          )}
-
-          {/* Pulsating FAB Action Button */}
-          <button
-            onClick={() => setIsAssistantOpen(prev => !prev)}
-            className={`w-12 h-12 rounded-full border flex items-center justify-center cursor-pointer transition-all duration-300 relative group ${isAssistantOpen
-                ? 'bg-indigo-600 border-indigo-600 text-white shadow-md'
-                : 'bg-white border-slate-200 text-slate-700 shadow-lg hover:bg-slate-50'
+            {/* AI Assistant Toggle */}
+            <button
+              onClick={() => setIsAssistantOpen(prev => !prev)}
+              className={`p-2 rounded-xl border hover-scale cursor-pointer text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                isAssistantOpen
+                  ? 'bg-indigo-600 border-indigo-600 text-white'
+                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/5 border-transparent hover:border-white/5'
               }`}
-            title="Toggle AI Assistant"
-            aria-label="Toggle AI Assistant"
-          >
-            {/* Pulsating animation ring */}
-            <span className={`absolute -inset-1 rounded-full border animate-ping [animation-duration:2s] pointer-events-none opacity-20 ${isAssistantOpen ? 'border-indigo-600' : 'border-slate-300'
-              }`} />
+              title="Toggle AI Co-pilot"
+            >
+              <span>✨</span>
+              <span className="hidden md:inline">Copilot</span>
+            </button>
 
-            <span className="text-xs font-bold uppercase">AI</span>
-          </button>
-        </div>
+            {/* Theme Toggle */}
+            <button
+              onClick={handleToggleTheme}
+              className="p-2 rounded-xl text-zinc-400 hover:text-zinc-200 hover:bg-white/5 border border-transparent hover:border-white/5 hover-scale cursor-pointer transition-all"
+              title={theme === 'dark' ? 'Switch to Light Aura' : 'Switch to Space Aura'}
+            >
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
+          </div>
+        </nav>
       </div>
+
+      {/* sliding / floating AI Assistant overlay panel */}
+      {isAssistantOpen && (
+        <div className="fixed bottom-28 right-6 z-40 animate-in fade-in slide-in-from-bottom-5 duration-300">
+          <ChatbotWidget
+            isInline={false}
+            isOpen={isAssistantOpen}
+            onClose={() => setIsAssistantOpen(false)}
+            contextPrompt={assistantContextPrompt}
+            clearContextPrompt={() => setAssistantContextPrompt('')}
+          />
+        </div>
+      )}
+
+      {/* Command Palette Overlay */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onSelectMode={setMode}
+        onSelectTargetLanguage={setTargetLanguage}
+        onSelectSourceLanguage={setInputLanguage}
+        onSelectStyle={setTranslationMode}
+        onClearHistory={handleClearHistory}
+        onAskAI={handleAskAssistant}
+      />
     </div>
   );
 };

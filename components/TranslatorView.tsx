@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { translateTextGroq, analyzeSentimentGroq, transcribeAudioGroq, generateSpeechGroq, isGroqTtsActive } from '../services/groqService';
 import { SentimentResult, Language, HistoryItem, SentimentLabel } from '../types';
 import { LANGUAGES } from '../constants';
-import SentimentDisplay from './SentimentDisplay';
-import FramePlayer from './FramePlayer';
 import { MicrophoneIcon, StopIcon, SpinnerIcon, SpeakerIcon, HistoryIcon, TrashIcon, CloseIcon, PositiveIcon, NegativeIcon, NeutralIcon } from './icons';
 
 declare global {
@@ -17,22 +15,32 @@ const HISTORY_STORAGE_KEY = 'translationHistory';
 
 interface TranslatorViewProps {
   onAskAssistant: (prompt: string) => void;
+  inputLanguage: string;
+  setInputLanguage: (lang: string) => void;
+  targetLanguage: string;
+  setTargetLanguage: (lang: string) => void;
+  translationMode: 'native' | 'industrial' | 'customer';
+  setTranslationMode: (mode: 'native' | 'industrial' | 'customer') => void;
+  clearHistoryTrigger: number;
 }
 
-type TranslationMode = 'native' | 'industrial' | 'customer';
-
-const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
+const TranslatorView: React.FC<TranslatorViewProps> = ({
+  onAskAssistant,
+  inputLanguage,
+  setInputLanguage,
+  targetLanguage,
+  setTargetLanguage,
+  translationMode,
+  setTranslationMode,
+  clearHistoryTrigger,
+}) => {
   const [inputText, setInputText] = useState<string>('');
   const [debouncedInputText, setDebouncedInputText] = useState<string>('');
   const [translatedText, setTranslatedText] = useState<string>('');
   const [displayedTranslatedText, setDisplayedTranslatedText] = useState<string>('');
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
-  const [targetLanguage, setTargetLanguage] = useState<string>('es');
 
-  // Dynamic translation mode
-  const [translationMode, setTranslationMode] = useState<TranslationMode>('industrial');
-
-  const [inputLanguage, setInputLanguage] = useState<string>('auto');
+  // Stats / AI feedback
   const [detectedLanguage, setDetectedLanguage] = useState<string>('');
   const [detectedLanguageCode, setDetectedLanguageCode] = useState<string>('');
   const [languageConfidence, setLanguageConfidence] = useState<number>(0);
@@ -50,8 +58,8 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
   const [isWhisperRecording, setIsWhisperRecording] = useState<boolean>(false);
   const [audioStream, setAudioStream] = useState<MediaStream | null>(null);
 
-  const isCjkInput = ['zh', 'ja', 'ko'].includes(inputLanguage) || ['zh', 'ja', 'ko'].includes(detectedLanguageCode);
-  const isCjkTarget = ['zh', 'ja', 'ko'].includes(targetLanguage);
+  // Layout UI states
+  const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
 
   const recognitionRef = useRef<any>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -64,57 +72,53 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
-  // Dynamic layout styling config based on translation mode
-  const modeStyles = {
+  const styleConfig = {
     native: {
-      primary: 'emerald-600',
-      accent: 'emerald-500',
-      bg: 'bg-emerald-50/50',
-      border: 'border-emerald-200',
-      focusRing: 'focus-within:ring-emerald-200',
-      button: 'bg-emerald-600 hover:bg-emerald-700 text-white',
-      badge: 'bg-emerald-50 border border-emerald-200 text-emerald-700',
-      text: 'text-emerald-700',
-      rawText: 'Colloquial Native Translator'
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-500/10',
+      border: 'border-emerald-500/20 animate-pulse',
+      desc: 'Colloquial standard'
     },
     industrial: {
-      primary: 'blue-600',
-      accent: 'blue-500',
-      bg: 'bg-blue-50/50',
-      border: 'border-blue-200',
-      focusRing: 'focus-within:ring-blue-200',
-      button: 'bg-blue-600 hover:bg-blue-700 text-white',
-      badge: 'bg-blue-50 border border-blue-200 text-blue-700',
-      text: 'text-blue-700',
-      rawText: 'Industrialized Technical Translator'
+      color: 'text-blue-400',
+      bg: 'bg-blue-500/10',
+      border: 'border-blue-500/20 animate-pulse',
+      desc: 'Technical precise'
     },
     customer: {
-      primary: 'amber-600',
-      accent: 'amber-500',
-      bg: 'bg-amber-50/50',
-      border: 'border-amber-200',
-      focusRing: 'focus-within:ring-amber-200',
-      button: 'bg-amber-600 hover:bg-amber-700 text-white',
-      badge: 'bg-amber-50 border border-amber-200 text-amber-700',
-      text: 'text-amber-700',
-      rawText: 'Customer Satisfaction Translator'
+      color: 'text-amber-400',
+      bg: 'bg-amber-500/10',
+      border: 'border-amber-500/20 animate-pulse',
+      desc: 'Empathetic corporate'
     }
   };
 
-  const style = modeStyles[translationMode];
+  const currentStyle = styleConfig[translationMode];
 
   // Load history
   useEffect(() => {
     try {
       const storedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
       if (storedHistory) setHistory(JSON.parse(storedHistory));
-    } catch (e) { console.error('Failed to load history', e); }
+    } catch (e) {
+      console.error('Failed to load history', e);
+    }
   }, []);
+
+  // Sync clear history signal from parent
+  useEffect(() => {
+    if (clearHistoryTrigger > 0) {
+      setHistory([]);
+    }
+  }, [clearHistoryTrigger]);
 
   // Save history
   useEffect(() => {
-    try { localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history)); }
-    catch (e) { console.error('Failed to save history', e); }
+    try {
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+    } catch (e) {
+      console.error('Failed to save history', e);
+    }
   }, [history]);
 
   // Debounce input text
@@ -145,7 +149,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
         clearInterval(interval);
         setIsStreaming(false);
       }
-    }, 40 + Math.random() * 25);
+    }, 35 + Math.random() * 20);
 
     return () => {
       clearInterval(interval);
@@ -154,10 +158,10 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
   }, [translatedText]);
 
   const addToHistory = useCallback((item: Omit<HistoryItem, 'id' | 'timestamp'>) => {
-    setHistory(prev => {
+    setHistory((prev) => {
       const newItem: HistoryItem = { ...item, id: new Date().toISOString() + Math.random(), timestamp: Date.now() };
-      if (prev.some(h => h.inputText === newItem.inputText && h.translatedText === newItem.translatedText && h.targetLanguage === newItem.targetLanguage)) return prev;
-      return [newItem, ...prev].slice(0, 30);
+      if (prev.some((h) => h.inputText === newItem.inputText && h.translatedText === newItem.translatedText && h.targetLanguage === newItem.targetLanguage)) return prev;
+      return [newItem, ...prev].slice(0, 25);
     });
   }, []);
 
@@ -187,7 +191,6 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
       let currentDetLang = '';
       let translationError = false;
 
-      // Map translation mode style instruction
       let styleInstruction = '';
       if (translationMode === 'native') {
         styleInstruction = 'Translate in a natural, colloquial, and fluent native style appropriate for standard, everyday conversation.';
@@ -198,7 +201,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
       }
 
       const tp = translateTextGroq(debouncedInputText, inputLanguage, targetLanguage, styleInstruction)
-        .then(res => {
+        .then((res) => {
           setTranslatedText(res.translatedText);
           currentTranslation = res.translatedText;
           if (res.detectedLanguageName) {
@@ -222,12 +225,23 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
           }
           return res.translatedText;
         })
-        .catch(e => { console.error('Translation error:', e); translationError = true; return ''; })
+        .catch((e) => {
+          console.error('Translation error:', e);
+          translationError = true;
+          return '';
+        })
         .finally(() => setIsTranslating(false));
 
       const sp = analyzeSentimentGroq(debouncedInputText)
-        .then(r => { setSentiment(r); currentSentiment = r; return r; })
-        .catch(e => { console.error('Sentiment error:', e); return null; })
+        .then((r) => {
+          setSentiment(r);
+          currentSentiment = r;
+          return r;
+        })
+        .catch((e) => {
+          console.error('Sentiment error:', e);
+          return null;
+        })
         .finally(() => setIsAnalyzingSentiment(false));
 
       await Promise.all([tp, sp]);
@@ -235,7 +249,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
       if (translationError) {
         setError('Failed to translate text. Please try again.');
       } else if (currentTranslation && currentSentiment) {
-        const targetLanguageName = LANGUAGES.find(l => l.code === targetLanguage)?.name || '';
+        const targetLanguageName = LANGUAGES.find((l) => l.code === targetLanguage)?.name || '';
         addToHistory({
           inputText: debouncedInputText,
           translatedText: currentTranslation,
@@ -245,7 +259,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
           languageConfidence: currentConf,
           qualityScore: currentQual,
           clarityScore: currentClar,
-          detectedLanguageName: currentDetLang
+          detectedLanguageName: currentDetLang,
         });
       }
     };
@@ -253,7 +267,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
     run();
   }, [debouncedInputText, inputLanguage, targetLanguage, translationMode, addToHistory]);
 
-  // Speech Recognition (Web API)
+  // Speech Recognition setup (Web API)
   useEffect(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) return;
@@ -262,17 +276,30 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
     recognition.interimResults = true;
     recognition.lang = inputLanguage === 'auto' ? (navigator.language || 'en') : inputLanguage;
 
-    recognition.onstart = () => { setIsRecording(true); setError(''); };
+    recognition.onstart = () => {
+      setIsRecording(true);
+      setError('');
+    };
     recognition.onresult = (event: any) => {
       let finalTranscript = '';
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
       }
-      if (finalTranscript) setInputText(prev => { const t = prev.trim(); return t ? `${t} ${finalTranscript.trim()}` : finalTranscript.trim(); });
+      if (finalTranscript) {
+        setInputText((prev) => {
+          const t = prev.trim();
+          return t ? `${t} ${finalTranscript.trim()}` : finalTranscript.trim();
+        });
+      }
     };
     recognition.onerror = (event: any) => {
-      if (event.error === 'not-allowed') { setError('Microphone access denied.'); setIsRecording(false); }
-      else if (event.error !== 'no-speech') { setError(`Speech recognition error: ${event.error}`); setIsRecording(false); }
+      if (event.error === 'not-allowed') {
+        setError('Microphone access denied.');
+        setIsRecording(false);
+      } else if (event.error !== 'no-speech') {
+        setError(`Speech recognition error: ${event.error}`);
+        setIsRecording(false);
+      }
     };
     recognition.onend = () => setIsRecording(false);
     recognitionRef.current = recognition;
@@ -294,29 +321,37 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
       const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
-      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        stream.getTracks().forEach(t => t.stop());
+        stream.getTracks().forEach((t) => t.stop());
         setAudioStream(null);
 
-        if (animationFrameRef.current) {
-          cancelAnimationFrame(animationFrameRef.current);
-        }
+        if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
         if (audioContextRef.current) {
-          audioContextRef.current.close().catch(() => { });
+          audioContextRef.current.close().catch(() => {});
           audioContextRef.current = null;
         }
 
         setIsTranslating(true);
         try {
           const text = await transcribeAudioGroq(audioBlob, inputLanguage);
-          if (text.trim()) setInputText(prev => { const t = prev.trim(); return t ? `${t} ${text.trim()}` : text.trim(); });
-        } catch (err: any) { setError('Transcription failed: ' + err.message); }
-        finally { setIsTranslating(false); }
+          if (text.trim()) {
+            setInputText((prev) => {
+              const t = prev.trim();
+              return t ? `${t} ${text.trim()}` : text.trim();
+            });
+          }
+        } catch (err: any) {
+          setError('Transcription failed: ' + err.message);
+        } finally {
+          setIsTranslating(false);
+        }
       };
 
-      // VAD / silence auto-termination logic
+      // Silence detection trigger
       try {
         const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
         const audioContext = new AudioContextClass();
@@ -348,8 +383,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
             lastSoundTime = Date.now();
           }
 
-          if (Date.now() - lastSoundTime > 3000) { // 3-second pause auto-termination
-            console.log("Silence auto-termination triggered. Stopping recording.");
+          if (Date.now() - lastSoundTime > 3000) {
             stopWhisperRecording();
           } else {
             animationFrameRef.current = requestAnimationFrame(checkSilence);
@@ -358,12 +392,14 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
 
         animationFrameRef.current = requestAnimationFrame(checkSilence);
       } catch (vadErr) {
-        console.error("VAD initialization failed:", vadErr);
+        console.error('VAD initialization failed:', vadErr);
       }
 
       mediaRecorder.start();
       setIsWhisperRecording(true);
-    } catch (err: any) { setError('Failed to access microphone: ' + err.message); }
+    } catch (err: any) {
+      setError('Failed to access microphone: ' + err.message);
+    }
   };
 
   const stopWhisperRecording = () => {
@@ -379,20 +415,33 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
       isWhisperRecording ? stopWhisperRecording() : startWhisperRecording();
       return;
     }
-    if (!recognitionRef.current) { setError('Speech recognition is not supported in this browser.'); return; }
+    if (!recognitionRef.current) {
+      setError('Speech recognition is not supported in this browser.');
+      return;
+    }
     if (isRecording) {
       recognitionRef.current.stop();
     } else {
       setError('');
       recognitionRef.current.lang = inputLanguage;
-      try { recognitionRef.current.start(); } catch (e) { setError('Could not start microphone. Refresh and try again.'); }
+      try {
+        recognitionRef.current.start();
+      } catch (e) {
+        setError('Could not start microphone. Refresh and try again.');
+      }
     }
   };
 
   const handleSpeak = useCallback(async () => {
     if (!translatedText) return;
-    if (isSpeaking) { audioRef.current?.pause(); window.speechSynthesis.cancel(); setIsSpeaking(false); return; }
-    setIsSpeaking(true); setError('');
+    if (isSpeaking) {
+      audioRef.current?.pause();
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+    setIsSpeaking(true);
+    setError('');
 
     const hasGroqKey = !!import.meta.env.VITE_GROQ_API_KEY;
     if (hasGroqKey && isGroqTtsActive()) {
@@ -402,21 +451,28 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
         if (!audioRef.current) {
           const audio = new Audio(url);
           audio.onended = () => setIsSpeaking(false);
-          audio.onerror = () => { speakNative(); };
+          audio.onerror = () => speakNative();
           audioRef.current = audio;
-        } else { audioRef.current.src = url; }
+        } else {
+          audioRef.current.src = url;
+        }
         audioRef.current.playbackRate = speechRate;
         audioRef.current.play();
-      } catch { speakNative(); }
-    } else { speakNative(); }
+      } catch {
+        speakNative();
+      }
+    } else {
+      speakNative();
+    }
 
     function speakNative() {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(translatedText);
-      u.lang = targetLanguage; u.rate = speechRate;
+      u.lang = targetLanguage;
+      u.rate = speechRate;
 
       let wordCount = translatedText.split(/\s+/).length;
-      if (['zh', 'ja', 'ko'].some(langCode => targetLanguage.startsWith(langCode))) {
+      if (['zh', 'ja', 'ko'].some((langCode) => targetLanguage.startsWith(langCode))) {
         wordCount = translatedText.length;
       }
       const estimatedDurationMs = Math.max(3000, (wordCount * 400) / speechRate + 3000);
@@ -450,15 +506,24 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
     window.speechSynthesis.cancel();
     audioRef.current?.pause();
     if (mediaRecorderRef.current?.stream) {
-      mediaRecorderRef.current.stream.getTracks().forEach(t => t.stop());
+      mediaRecorderRef.current.stream.getTracks().forEach((t) => t.stop());
     }
     if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-    if (audioContextRef.current) audioContextRef.current.close().catch(() => { });
+    if (audioContextRef.current) audioContextRef.current.close().catch(() => {});
   }, []);
-  useEffect(() => { if (isSpeaking) { window.speechSynthesis.cancel(); audioRef.current?.pause(); setIsSpeaking(false); } }, [translatedText]);
 
-  const deleteHistoryItem = (id: string) => setHistory(prev => prev.filter(item => item.id !== id));
-  const clearHistory = () => setHistory([]);
+  useEffect(() => {
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      audioRef.current?.pause();
+      setIsSpeaking(false);
+    }
+  }, [translatedText]);
+
+  const deleteHistoryItem = (id: string) => {
+    setHistory((prev) => prev.filter((item) => item.id !== id));
+  };
+
   const loadFromHistory = (item: HistoryItem) => {
     setInputText(item.inputText);
     setTargetLanguage(item.targetLanguage);
@@ -468,326 +533,357 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({ onAskAssistant }) => {
     if (item.clarityScore) setClarityScore(item.clarityScore);
   };
 
-  const renderSentimentIcon = (s: SentimentLabel) => {
-    const cls = 'w-4 h-4';
-    switch (s) {
-      case SentimentLabel.Positive: return <PositiveIcon className={`${cls} text-emerald-500`} />;
-      case SentimentLabel.Negative: return <NegativeIcon className={`${cls} text-red-500`} />;
-      default: return <NeutralIcon className={`${cls} text-slate-400`} />;
-    }
+  const renderSentimentBadge = () => {
+    if (!sentiment) return null;
+    const colors = {
+      [SentimentLabel.Positive]: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+      [SentimentLabel.Negative]: 'text-red-400 bg-red-500/10 border-red-500/20',
+      [SentimentLabel.Neutral]: 'text-zinc-400 bg-zinc-500/10 border-zinc-500/20',
+    };
+    return (
+      <div
+        className={`px-3 py-1 rounded-full border text-[10px] font-bold flex items-center gap-1.5 transition-all shadow-sm ${colors[sentiment.sentiment]}`}
+        title={`${sentiment.explanation} (Intensity: ${Math.round(sentiment.intensity * 100)}%)`}
+      >
+        <span>
+          {sentiment.sentiment === SentimentLabel.Positive && '😊'}
+          {sentiment.sentiment === SentimentLabel.Negative && '😢'}
+          {sentiment.sentiment === SentimentLabel.Neutral && '😐'}
+        </span>
+        <span className="capitalize">{sentiment.sentiment}</span>
+        <span className="text-white/30">|</span>
+        <span className="text-[9px]">Tone: {sentiment.tone}</span>
+      </div>
+    );
   };
 
-  const selectCls = 'bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-lg text-sm outline-none font-semibold cursor-pointer focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors shadow-sm';
+  const handleClearHistory = () => {
+    setHistory([]);
+    try {
+      localStorage.removeItem(HISTORY_STORAGE_KEY);
+    } catch {}
+  };
 
   return (
-    <>
-      {/* Left Column - Decryptor Workspace (70%) */}
-      <div className="col-span-full lg:col-span-7 flex flex-col gap-6">
+    <div className="w-full flex flex-col gap-8 items-center justify-center min-h-[70vh]">
+      
+      {/* Floating Workspace Settings Panel (Boundary-less glass capsule) */}
+      <div className="glass-pill px-6 py-2.5 flex items-center justify-between gap-6 w-full max-w-4xl shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
+        
+        {/* Language Flow Selector */}
+        <div className="flex items-center gap-3">
+          <select
+            value={inputLanguage}
+            onChange={(e) => setInputLanguage(e.target.value)}
+            className="bg-transparent text-xs font-bold text-zinc-700 dark:text-zinc-300 border-none outline-none cursor-pointer hover:text-black dark:hover:text-white transition-colors"
+          >
+            <option value="auto" className="bg-white dark:bg-zinc-950 text-zinc-850 dark:text-zinc-300">Auto-Detect Language</option>
+            {LANGUAGES.map((l) => (
+              <option key={l.code} value={l.code} className="bg-white dark:bg-zinc-950 text-zinc-850 dark:text-zinc-300">
+                {l.name}
+              </option>
+            ))}
+          </select>
 
-        {/* Settings Control Panel */}
-        <div className="cyber-terminal p-4 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span className="text-zinc-400 dark:text-zinc-500 text-xs">→</span>
 
-          {/* Translator Mode dynamic selector */}
-          <div className="flex items-center gap-2 self-start sm:self-center">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Engine:</span>
-            <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200">
-              {(['native', 'industrial', 'customer'] as TranslationMode[]).map((modeOpt) => {
-                const isActive = translationMode === modeOpt;
-                let activeClass = '';
-                if (modeOpt === 'native') activeClass = isActive ? 'bg-emerald-600 text-white font-bold' : 'text-slate-600 hover:text-slate-900';
-                if (modeOpt === 'industrial') activeClass = isActive ? 'bg-blue-600 text-white font-bold' : 'text-slate-600 hover:text-slate-900';
-                if (modeOpt === 'customer') activeClass = isActive ? 'bg-amber-600 text-white font-bold' : 'text-slate-600 hover:text-slate-900';
-
-                return (
-                  <button
-                    key={modeOpt}
-                    onClick={() => setTranslationMode(modeOpt)}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all duration-200 capitalize ${activeClass}`}
-                  >
-                    {modeOpt}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-center justify-end">
-            {/* Source Lang dropdown */}
-            <div className="w-full sm:w-auto relative">
-              <select value={inputLanguage} onChange={e => setInputLanguage(e.target.value)} className={selectCls}>
-                <option value="auto">🔍 Auto-Detect Language</option>
-                {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
-              </select>
-            </div>
-
-            <div className="hidden sm:flex items-center justify-center text-slate-400">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </div>
-
-            {/* Target Lang dropdown */}
-            <div className="w-full sm:w-auto">
-              <select value={targetLanguage} onChange={e => setTargetLanguage(e.target.value)} className={selectCls}>
-                {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
-              </select>
-            </div>
-          </div>
+          <select
+            value={targetLanguage}
+            onChange={(e) => setTargetLanguage(e.target.value)}
+            className="bg-transparent text-xs font-bold text-zinc-700 dark:text-zinc-300 border-none outline-none cursor-pointer hover:text-black dark:hover:text-white transition-colors"
+          >
+            {LANGUAGES.map((l) => (
+              <option key={l.code} value={l.code} className="bg-white dark:bg-zinc-950 text-zinc-850 dark:text-zinc-300">
+                {l.name}
+              </option>
+            ))}
+          </select>
         </div>
 
-        {/* Main Studio workspace Grid */}
-        <div className="grid grid-cols-1 grid-cols-[repeat(auto-fit,minmax(min(100%,320px),1fr))] gap-6">
-
-          {/* Input box */}
-          <div className={`container-query-parent relative group flex flex-col min-h-[300px] cyber-terminal transition-all duration-300 responsive-card ${style.focusRing}`}>
-
-            <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50">
-              <div className="flex items-center gap-2">
-                <span className={`w-2.5 h-2.5 rounded-full bg-${style.primary} animate-pulse`} />
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 font-sans">
-                  Source Text ({inputLanguage === 'auto' ? `Detecting${detectedLanguage ? `: ${detectedLanguage}` : ''}` : LANGUAGES.find(l => l.code === inputLanguage)?.name})
-                </span>
-              </div>
-              {inputText && (
-                <button
-                  onClick={() => { setInputText(''); setTranslatedText(''); setSentiment(null); setError(''); textareaRef.current?.focus(); }}
-                  className="text-slate-400 hover:text-red-500 p-1 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
-                  title="Clear content"
-                >
-                  <CloseIcon className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-
-            <textarea
-              ref={textareaRef}
-              value={inputText}
-              onChange={e => setInputText(e.target.value)}
-              placeholder="Type or speak text here..."
-              className={`flex-grow w-full p-6 bg-transparent border-none resize-y min-h-[220px] focus:ring-0 text-sm leading-relaxed text-slate-800 placeholder-slate-400 outline-none responsive-text font-sans`}
-            />
-
-            {/* Character counter & Whisper/recording trigger */}
-            <div className="p-4 flex items-center justify-between border-t border-slate-100 bg-slate-50">
-              <span className="text-xs text-slate-400 font-medium font-sans">{inputText.length} characters</span>
-              <div className="relative">
-                {(isWhisperRecording || isRecording) && (
-                  <span className="absolute -inset-1.5 bg-red-500 rounded-full animate-ping opacity-25" />
-                )}
-                <button
-                  onClick={handleToggleRecording}
-                  className={`p-3 rounded-xl transition-all duration-300 shadow-md ${isRecording || isWhisperRecording
-                      ? 'bg-red-600 text-white scale-105'
-                      : `cyber-button-${translationMode === 'native' ? 'pink' : translationMode === 'industrial' ? 'cyan' : 'pink'} rounded-xl`
-                    } cursor-pointer`}
-                  title={isRecording || isWhisperRecording ? 'Stop Recording' : 'Voice Input'}
-                >
-                  {isRecording || isWhisperRecording ? <StopIcon className="w-5 h-5" /> : <MicrophoneIcon className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Output box */}
-          <div className="container-query-parent relative flex flex-col min-h-[300px] cyber-terminal transition-all duration-300 responsive-card">
-
-            <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50">
-              <div className="flex items-center gap-2">
-                <span className={`w-2.5 h-2.5 rounded-full bg-${style.accent} animate-pulse`} />
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 font-sans">
-                  Translation Output ({LANGUAGES.find(l => l.code === targetLanguage)?.name})
-                </span>
-              </div>
-              {isTranslating && <SpinnerIcon className="w-4 h-4 animate-spin text-slate-500" />}
-            </div>
-
-            <div className="flex-grow p-6 min-h-[220px] text-sm font-sans">
-              {displayedTranslatedText ? (
-                <p className="leading-relaxed text-slate-800 whitespace-pre-wrap responsive-text">
-                  {displayedTranslatedText}
-                  {isStreaming && (
-                    <span className={`inline-block w-1.5 h-4 ml-1 bg-${style.primary} animate-pulse`} />
-                  )}
-                </p>
-              ) : isTranslating ? (
-                <p className="text-slate-400 italic animate-pulse">AI generating translation...</p>
-              ) : (
-                <p className="text-slate-400 italic">Waiting for text input...</p>
-              )}
-              {error && <p className="text-red-500 text-sm mt-4 font-medium">{error}</p>}
-            </div>
-
-            {/* Quick Co-pilot & Speak controls */}
-            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between flex-wrap gap-3">
-              <div className="flex items-center gap-3">
-                {translatedText && (
-                  <>
-                    <button
-                      onClick={() => onAskAssistant(`I am working on this translation from ${inputLanguage === 'auto' ? 'Auto-Detect' : LANGUAGES.find(l => l.code === inputLanguage)?.name} to ${LANGUAGES.find(l => l.code === targetLanguage)?.name}:\n\nInput: "${inputText}"\nTranslated: "${translatedText}"\n\nCan you explain the key grammar structures or suggest idiomatic alternatives?`)}
-                      className={`px-4 py-2 rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer bg-white border border-slate-200 text-slate-700 hover:bg-slate-50`}
-                    >
-                      ✨ Grammar & Phrases
-                    </button>
-
-                    {/* Speech rate slider */}
-                    <div className="flex items-center gap-2 bg-white px-3 py-1.5 border border-slate-200 rounded-lg shadow-sm font-sans text-xs">
-                      <span className="text-[10px] font-bold text-slate-400 w-6 text-right">{speechRate}x</span>
-                      <input
-                        type="range" min="0.5" max="2" step="0.25" value={speechRate}
-                        onChange={e => setSpeechRate(parseFloat(e.target.value))}
-                        className="w-16 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {translatedText && (
-                <button
-                  onClick={handleSpeak}
-                  className={`p-2.5 rounded-lg border transition-all shadow-sm ${isSpeaking ? 'bg-indigo-50 border-indigo-200 text-indigo-600 scale-105' : 'bg-white border-slate-200 text-slate-400 hover:text-slate-600'} cursor-pointer`}
-                  title="Speak Text"
-                >
-                  {isSpeaking ? <StopIcon className="w-5 h-5" /> : <SpeakerIcon className="w-5 h-5" />}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Translation History Timeline */}
-        {history.length > 0 && (
-          <div className="cyber-terminal overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm">
-            <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <HistoryIcon className="w-4 h-4 text-slate-500" />
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 font-sans">Translation History</span>
-              </div>
-              <button
-                onClick={clearHistory}
-                className="text-xs font-semibold text-red-600 hover:text-red-700 px-3 py-1.5 border border-slate-200 bg-white hover:bg-slate-50 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
-              >
-                <TrashIcon className="w-3.5 h-3.5" /> Clear History
-              </button>
-            </div>
-
-            <div className="p-6">
-              <div className="relative border-l-2 border-slate-100 ml-3 pl-6 space-y-6">
-                {history.map((item) => (
-                  <div
-                    key={item.id}
-                    className="relative group cursor-pointer animate-in fade-in duration-300"
-                    onClick={() => loadFromHistory(item)}
-                  >
-                    {/* Circle dot on the line */}
-                    <span className="absolute -left-[31px] top-1.5 w-3.5 h-3.5 rounded-full bg-white border-2 border-slate-200 group-hover:border-indigo-500 transition-colors flex items-center justify-center">
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-200 group-hover:bg-indigo-500 transition-colors" />
-                    </span>
-
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-100 group-hover:border-slate-200 rounded-xl transition-all">
-                      <div className="flex-grow min-w-0 mr-4">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-[10px] text-slate-400 font-medium">
-                            {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                          <span className="w-1 h-1 rounded-full bg-slate-300" />
-                          <span className="text-[10px] font-bold text-indigo-600 uppercase">
-                            {item.detectedLanguageName ? `${item.detectedLanguageName} → ${item.targetLanguageName}` : `Auto → ${item.targetLanguageName}`}
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-500 truncate font-sans">{item.inputText}</p>
-                        <p className="text-sm font-semibold text-slate-800 mt-0.5 font-sans">{item.translatedText}</p>
-                      </div>
-
-                      <div className="flex items-center gap-3 flex-shrink-0 self-end sm:self-center">
-                        {item.sentiment && (
-                          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white border border-slate-200 text-[10px] font-bold text-slate-600 shadow-sm font-sans">
-                            {renderSentimentIcon(item.sentiment.sentiment)}
-                            <span className="capitalize">{item.sentiment.sentiment}</span>
-                          </div>
-                        )}
-
-                        <button
-                          onClick={e => { e.stopPropagation(); deleteHistoryItem(item.id); }}
-                          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-red-500 shadow-sm transition-all cursor-pointer"
-                        >
-                          <TrashIcon className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Right Column - AI Insights (30%) */}
-      <div className="col-span-full lg:col-span-3 flex flex-col gap-6">
-
-        {/* Frame Preview — desktop: landscape frame_one, mobile: portrait frame_two */}
-        <div className="hidden md:block">
-          <FramePlayer frameFolder="frame_one" className="w-full" />
-        </div>
-        <div className="block md:hidden">
-          <FramePlayer frameFolder="frame_two" className="w-full max-w-xs mx-auto" />
-        </div>
-
-        {/* Detection Confidence Card */}
-        {detectedLanguage && inputLanguage === 'auto' && (
-          <div className="cyber-terminal p-4 flex items-center justify-between bg-white border border-slate-200 rounded-xl shadow-sm">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider font-sans">Detected Language</span>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-100 text-xs font-bold text-indigo-600">
-                {detectedLanguage.toUpperCase()}
-              </span>
-              <span className="text-xs font-bold text-slate-500">
-                {Math.round(languageConfidence * 100)}% Match
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Translation Quality Metrics */}
-        {translatedText && !isTranslating && (
-          <div className="flex flex-col gap-4">
-            {[
-              { label: 'Translation Quality', score: qualityScore, color: 'from-emerald-600 to-green-400' },
-              { label: 'Grammar & Clarity', score: clarityScore, color: 'from-blue-600 to-indigo-400' },
-              { label: 'Confidence Match', score: languageConfidence, color: 'from-purple-600 to-pink-500' }
-            ].map((stat, sIdx) => {
-              const pct = Math.round(stat.score * 100);
+        {/* Translation Register Switches */}
+        <div className="flex items-center gap-3">
+          
+          <div className="flex items-center bg-zinc-800/10 dark:bg-white/5 border border-zinc-200 dark:border-white/5 rounded-xl p-0.5">
+            {(['native', 'industrial', 'customer'] as const).map((modeOpt) => {
+              const active = translationMode === modeOpt;
               return (
-                <div key={sIdx} className="cyber-terminal p-4 flex flex-col justify-between bg-white border border-slate-200 rounded-xl shadow-sm">
-                  <div className="flex justify-between items-center mb-2 font-sans">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{stat.label}</span>
-                    <span className="text-sm font-extrabold text-slate-800">{pct}%</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full bg-gradient-to-r ${stat.color} transition-all duration-700`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </div>
+                <button
+                  key={modeOpt}
+                  onClick={() => setTranslationMode(modeOpt)}
+                  className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                    active ? 'bg-indigo-600 text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
+                  }`}
+                >
+                  {modeOpt}
+                </button>
               );
             })}
           </div>
-        )}
 
-        {/* Sentiment Insights Panel */}
-        <div className="cyber-terminal overflow-hidden flex flex-col flex-shrink-0 bg-white border border-slate-200 rounded-xl shadow-sm">
-          <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
-            <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse" />
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-700 font-sans">Tone & Sentiment Analysis</span>
+          <div className="w-px h-4 bg-zinc-200 dark:bg-white/10" />
+
+          {/* History drawer trigger button */}
+          <button
+            onClick={() => setIsHistoryOpen(true)}
+            className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-zinc-850 dark:hover:text-zinc-200 hover:bg-zinc-800/5 dark:hover:bg-white/5 transition-colors cursor-pointer flex items-center gap-1"
+            title="Open Timeline History"
+          >
+            <HistoryIcon className="w-4 h-4" />
+            <span className="text-[10px] font-bold uppercase tracking-wider hidden sm:inline">Timeline</span>
+          </button>
+        </div>
+
+      </div>
+
+      {/* Boundary-less Split Pane Studio Workspace */}
+      <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+        
+        {/* Left column: Boundary-less Writing Space */}
+        <div className="glass-panel p-8 flex flex-col justify-between min-h-[360px] relative transition-all duration-300 group hover:border-zinc-300/40 dark:hover:border-white/15">
+          <div className="flex items-center justify-between pb-3 border-b border-zinc-200/50 dark:border-white/5">
+            <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+              <span className={`w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse`} />
+              Source Input
+            </span>
+            {inputText && (
+              <button
+                onClick={() => {
+                  setInputText('');
+                  setTranslatedText('');
+                  setSentiment(null);
+                  setError('');
+                }}
+                className="text-zinc-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 p-1 rounded-lg hover:bg-zinc-800/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                title="Clear input"
+              >
+                <CloseIcon className="w-4 h-4" />
+              </button>
+            )}
           </div>
-          <div className="p-5 bg-transparent">
-            <SentimentDisplay sentimentResult={sentiment} isLoading={isAnalyzingSentiment} />
+
+          <textarea
+            ref={textareaRef}
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder="Write a message or trigger voice capture..."
+            className="flex-grow w-full py-6 bg-transparent border-none text-base leading-relaxed text-zinc-850 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 outline-none resize-none min-h-[220px]"
+          />
+
+          <div className="pt-4 border-t border-zinc-200/50 dark:border-white/5 flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-550">
+            <span>{inputText.length} characters</span>
+
+            {/* Glowing Micro-Mic Button */}
+            <div className="relative">
+              {(isWhisperRecording || isRecording) && (
+                <span className="absolute -inset-1.5 bg-red-500 rounded-full animate-ping opacity-30" />
+              )}
+              <button
+                onClick={handleToggleRecording}
+                className={`p-3 rounded-full hover-scale cursor-pointer transition-all duration-300 shadow-md ${
+                  isRecording || isWhisperRecording
+                    ? 'bg-red-600 text-white'
+                    : 'bg-indigo-600 text-white shadow-lg'
+                }`}
+                title={isRecording || isWhisperRecording ? 'Stop speech capturing' : 'Start speech capturing'}
+              >
+                {isRecording || isWhisperRecording ? (
+                  <StopIcon className="w-4 h-4" />
+                ) : (
+                  <MicrophoneIcon className="w-4 h-4" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Right column: Translucent Translation Bubble View */}
+        <div className="glass-panel p-8 flex flex-col justify-between min-h-[360px] relative border-l border-zinc-200/50 dark:border-white/5 transition-all duration-300 group hover:border-zinc-300/40 dark:hover:border-white/15">
+          <div className="flex items-center justify-between pb-3 border-b border-zinc-200/50 dark:border-white/5">
+            <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+              <span className={`w-1.5 h-1.5 rounded-full ${currentStyle.color} ${currentStyle.border}`} />
+              Translation Link
+            </span>
+            {isTranslating && <SpinnerIcon className="w-4 h-4 animate-spin text-zinc-500 dark:text-zinc-400" />}
+          </div>
+
+          <div className="flex-grow py-6 min-h-[220px]">
+            {displayedTranslatedText ? (
+              <div className="space-y-4">
+                <p className="text-base leading-relaxed text-zinc-850 dark:text-zinc-100 text-glow">
+                  {displayedTranslatedText}
+                  {isStreaming && <span className={`inline-block w-1.5 h-4 ml-1 bg-indigo-500 animate-pulse`} />}
+                </p>
+
+                {/* Floating Metric badging inline */}
+                {!isTranslating && (
+                  <div className="flex flex-wrap items-center gap-2 pt-4">
+                    {renderSentimentBadge()}
+                    
+                    {qualityScore > 0 && (
+                      <span
+                        className="px-2 py-0.5 rounded-full bg-zinc-800/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-[9px] font-medium text-zinc-500 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors"
+                        title={`Clarity translation score: ${Math.round(qualityScore * 100)}%`}
+                      >
+                        Quality: {Math.round(qualityScore * 100)}%
+                      </span>
+                    )}
+
+                    {clarityScore > 0 && (
+                      <span
+                        className="px-2 py-0.5 rounded-full bg-zinc-800/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-[9px] font-medium text-zinc-500 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors"
+                        title={`Readability score: ${Math.round(clarityScore * 100)}%`}
+                      >
+                        Clarity: {Math.round(clarityScore * 100)}%
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : isTranslating ? (
+              <p className="text-zinc-550 dark:text-zinc-500 italic text-sm animate-pulse">Engaging neural translation...</p>
+            ) : (
+              <p className="text-zinc-550 dark:text-zinc-500 italic text-sm">Awaiting input stream to begin translation link...</p>
+            )}
+
+            {error && <p className="text-red-500 dark:text-red-400 text-xs mt-4 font-semibold">{error}</p>}
+          </div>
+
+          {/* Inline speak & grammar features */}
+          <div className="pt-4 border-t border-zinc-200/50 dark:border-white/5 flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              {translatedText && (
+                <>
+                  <button
+                    onClick={() =>
+                      onAskAssistant(
+                        `Explain vocabulary rules or give feedback on this translation:\nSource text: "${inputText}"\nTranslated: "${translatedText}"`
+                      )
+                    }
+                    className="px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider bg-zinc-800/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white cursor-pointer transition-colors"
+                  >
+                    ✨ Grammar Breakdown
+                  </button>
+
+                  {/* Playback speed slider */}
+                  <div className="flex items-center gap-1.5 bg-zinc-800/5 dark:bg-white/5 px-2.5 py-1.5 border border-zinc-200 dark:border-white/10 rounded-xl">
+                    <span className="text-[9px] font-bold text-zinc-500 dark:text-zinc-400 w-5">{speechRate}x</span>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="2"
+                      step="0.25"
+                      value={speechRate}
+                      onChange={(e) => setSpeechRate(parseFloat(e.target.value))}
+                      className="w-12 h-1 bg-zinc-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+
+            {translatedText && (
+              <button
+                onClick={handleSpeak}
+                className={`p-2.5 rounded-full border hover-scale transition-all ${
+                  isSpeaking ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-zinc-800/5 dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-550 dark:text-zinc-400 hover:text-zinc-850 dark:hover:text-zinc-200'
+                } cursor-pointer`}
+                title="Speak text"
+              >
+                {isSpeaking ? <StopIcon className="w-4 h-4" /> : <SpeakerIcon className="w-4 h-4" />}
+              </button>
+            )}
+          </div>
+        </div>
+
       </div>
-    </>
+
+      {/* Dynamic Slide-out History Timeline Overlay */}
+      {isHistoryOpen && (
+        <div
+          onClick={() => setIsHistoryOpen(false)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-end animate-in fade-in duration-200"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm glass-panel h-full rounded-l-3xl rounded-r-none border-l border-zinc-200 dark:border-white/10 p-6 flex flex-col justify-between overflow-hidden shadow-2xl animate-in slide-in-from-right duration-300"
+          >
+            <div className="flex items-center justify-between pb-4 border-b border-zinc-200/50 dark:border-white/5">
+              <div className="flex items-center gap-2">
+                <HistoryIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <span className="text-xs font-bold uppercase tracking-widest text-zinc-800 dark:text-zinc-200">Timeline Logs</span>
+              </div>
+              <button
+                onClick={() => setIsHistoryOpen(false)}
+                className="text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 p-1 hover:bg-zinc-800/5 dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+              >
+                <CloseIcon className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Timeline scroll area */}
+            <div className="flex-grow overflow-y-auto py-6 divide-y divide-zinc-200/50 dark:divide-white/5">
+              {history.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-zinc-500 text-xs italic text-center">
+                  No log entries stored yet. Write messages to populate.
+                </div>
+              ) : (
+                history.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => {
+                      loadFromHistory(item);
+                      setIsHistoryOpen(false);
+                    }}
+                    className="py-4 first:pt-0 cursor-pointer group flex flex-col gap-1 text-left"
+                  >
+                    <div className="flex items-center justify-between text-[9px] font-mono text-zinc-500">
+                      <span>{new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      <span className="text-indigo-650 dark:text-indigo-400 uppercase font-bold tracking-wider">
+                        {item.detectedLanguageName ? `${item.detectedLanguageName} → ${item.targetLanguageName}` : `Auto → ${item.targetLanguageName}`}
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-650 dark:text-zinc-400 truncate group-hover:text-zinc-800 dark:group-hover:text-zinc-200 transition-colors mt-0.5">{item.inputText}</p>
+                    <p className="text-xs text-zinc-850 dark:text-zinc-100 font-semibold truncate mt-0.5">{item.translatedText}</p>
+
+                    <div className="flex items-center gap-3 mt-1 text-[9px]">
+                      {item.sentiment && (
+                        <span className="text-zinc-500 dark:text-zinc-400 capitalize">
+                          Tone: {item.sentiment.tone}
+                        </span>
+                      )}
+                      
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteHistoryItem(item.id);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 ml-auto text-zinc-550 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 transition-all cursor-pointer"
+                        title="Delete log"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Footer wipe */}
+            {history.length > 0 && (
+              <div className="pt-4 border-t border-zinc-200/50 dark:border-white/5">
+                <button
+                  onClick={handleClearHistory}
+                  className="w-full py-2 bg-red-600/10 hover:bg-red-600/20 text-red-650 dark:text-red-400 border border-red-500/20 text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <TrashIcon className="w-3.5 h-3.5" />
+                  Wipe Timeline
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

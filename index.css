@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@300;400;500;600;700&display=swap');
+@variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-brand-50: #f5f3ff;
@@ -22,296 +23,254 @@
   --font-mono: 'Geist Mono', 'Courier New', monospace;
 }
 
-/* ── Lock Viewport Bounds ── */
+/* ── Custom Properties & CSS Variables ── */
+:root {
+  /* Default dark theme values to provide a luxury space aesthetics */
+  --background: #030303;
+  --surface: rgba(10, 10, 10, 0.7);
+  --card: rgba(20, 20, 20, 0.4);
+  --foreground: #f4f4f5;
+  --muted: #a1a1aa;
+  --border: rgba(255, 255, 255, 0.08);
+  
+  --primary: #6366f1; /* Indigo */
+  --accent: #3b82f6;  /* Cobalt Blue */
+  --purple: #10b981;  /* Emerald */
+  --amber: #f59e0b;   /* Amber */
+}
+
+/* Light mode support if toggled */
+.light {
+  --background: #fafafa;
+  --surface: rgba(255, 255, 255, 0.7);
+  --card: rgba(255, 255, 255, 0.85);
+  --foreground: #09090b;
+  --muted: #71717a;
+  --border: rgba(9, 9, 11, 0.08);
+  
+  --primary: #4f46e5;
+  --accent: #2563eb;
+  --purple: #059669;
+  --amber: #d97706;
+}
+
 html,
 body {
   margin: 0;
   padding: 0;
-  background-color: #ffffff;
-  color: #0f172a;
-}
-
-html {
+  background-color: var(--background);
+  color: var(--foreground);
+  overflow-x: hidden;
+  font-family: var(--font-sans);
   scroll-behavior: smooth;
-  overflow-y: auto;
-}
-
-
-
-/* ── Professional SaaS CSS Variables ── */
-:root {
-  --background: #ffffff;
-  --surface: #f8fafc;
-  /* Slate 50 */
-  --card: #ffffff;
-  --primary: #4f46e5;
-  /* Team / Brand Indigo */
-  --accent: #2563eb;
-  /* Industrialized Cobalt Blue */
-  --purple: #10b981;
-  /* Native Emerald Green */
-  --amber: #f59e0b;
-  /* Customer Satisfaction Orange-Amber */
-  --foreground: #0f172a;
-  /* Slate 900 */
-  --muted: #64748b;
-  /* Slate 500 */
-  --border: #e2e8f0;
-  /* Slate 200 */
-}
-
-/* Force light theme values even if dark class is toggled or configured */
-.dark {
-  --background: #ffffff;
-  --surface: #f8fafc;
-  --card: #ffffff;
-  --primary: #4f46e5;
-  --accent: #2563eb;
-  --purple: #10b981;
-  --amber: #f59e0b;
-  --foreground: #0f172a;
-  --muted: #64748b;
-  --border: #e2e8f0;
 }
 
 /* ── Scrollbars ── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: rgba(255, 255, 255, 0.2);
 }
 
-/* Scrollbar fallbacks for special panels */
-.scrollbar-red::-webkit-scrollbar-thumb,
-.scrollbar-cyan::-webkit-scrollbar-thumb,
-.scrollbar-pink::-webkit-scrollbar-thumb {
-  background: #cbd5e1 !important;
-  box-shadow: none !important;
+.light ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
 }
 
-.scrollbar-red::-webkit-scrollbar-thumb:hover,
-.scrollbar-cyan::-webkit-scrollbar-thumb:hover,
-.scrollbar-pink::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8 !important;
+.light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
 }
 
-/* ── Layout Shell ── */
-.app-shell-grid {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  width: 100%;
-  position: relative;
-  background-color: var(--surface);
+/* ── Immersive Glassmorphism ── */
+.glass-panel {
+  background: rgba(12, 12, 12, 0.35);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.8);
+  border-radius: 24px;
 }
 
-.workspace-stage-grid {
-  display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
-  gap: 1.5rem;
-  width: 100%;
+.light .glass-panel {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 24px 64px -12px rgba(15, 23, 42, 0.04);
 }
 
-@media (max-width: 1024px) {
-  .workspace-stage-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
+.glass-pill {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 9999px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* ── SaaS Backgrounds ── */
-.cyber-container {
-  position: relative;
-  background-color: var(--surface);
-  background-image: radial-gradient(#cbd5e1 0.75px, transparent 0.75px);
-  background-size: 20px 20px;
+.light .glass-pill {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-/* Remove scanline aesthetics entirely */
-.cyber-scanlines {
-  display: none !important;
+.glass-input {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ── Modern SaaS Cards (Replacing HUD Terminals) ── */
-.cyber-terminal,
-.cyber-terminal-cyan,
-.cyber-terminal-pink {
-  background: var(--card);
-  border: 1px solid var(--border);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
-  border-radius: 12px;
-  position: relative;
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.light .glass-input {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.light .glass-input:focus {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+/* ── Dynamic Ambient Background ── */
+.ambient-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -2;
   overflow: hidden;
-  transition: all 0.2s ease-in-out;
+  background-color: var(--background);
+  transition: background-color 1s ease;
 }
 
-/* Disable corner absolute elements */
-.cyber-terminal::before,
-.cyber-terminal::after,
-.cyber-terminal-cyan::before,
-.cyber-terminal-cyan::after,
-.cyber-terminal-pink::before,
-.cyber-terminal-pink::after {
-  display: none !important;
+.ambient-glow {
+  position: absolute;
+  width: 90vw;
+  height: 90vh;
+  border-radius: 50%;
+  filter: blur(140px);
+  opacity: 0.16;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  transition: transform 3s cubic-bezier(0.16, 1, 0.3, 1), background 1s ease;
 }
 
-/* ── Text shadows disabled ── */
-.cyber-glow-green,
-.cyber-glow-cyan,
-.cyber-glow-pink {
-  text-shadow: none !important;
+.light .ambient-glow {
+  mix-blend-mode: multiply;
+  opacity: 0.08;
 }
 
-/* ── Modern SaaS Buttons ── */
-.cyber-button {
-  background: var(--primary);
-  color: #ffffff !important;
-  border: 1px solid var(--primary);
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  box-shadow: 0 1px 2px 0 rgba(79, 70, 229, 0.05);
-  text-shadow: none !important;
-}
-
-.cyber-button:hover {
-  background: #4338ca;
-  /* Indigo-700 */
-  border-color: #4338ca;
-  color: #ffffff !important;
-  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1);
-}
-
-.cyber-button-cyan {
-  background: var(--accent);
-  color: #ffffff !important;
-  border: 1px solid var(--accent);
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  box-shadow: 0 1px 2px 0 rgba(37, 99, 235, 0.05);
-  text-shadow: none !important;
-}
-
-.cyber-button-cyan:hover {
-  background: #1d4ed8;
-  /* Blue-700 */
-  border-color: #1d4ed8;
-  color: #ffffff !important;
-  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1);
-}
-
-.cyber-button-pink {
-  background: var(--purple);
-  color: #ffffff !important;
-  border: 1px solid var(--purple);
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  box-shadow: 0 1px 2px 0 rgba(16, 185, 129, 0.05);
-  text-shadow: none !important;
-}
-
-.cyber-button-pink:hover {
-  background: #059669;
-  /* Emerald-600 */
-  border-color: #059669;
-  color: #ffffff !important;
-  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1);
-}
-
-/* ── Container Queries ── */
-.container-query-parent {
-  container-type: inline-size;
-}
-
-@container (max-width: 420px) {
-  .responsive-card {
-    padding: 1rem !important;
+/* ── Morphing Voice Core Avatar ── */
+@keyframes morph {
+  0% {
+    border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
   }
-
-  .responsive-text {
-    font-size: 0.95rem !important;
-    line-height: 1.4 !important;
+  33% {
+    border-radius: 70% 30% 52% 48% / 60% 40% 60% 40%;
+  }
+  66% {
+    border-radius: 28% 72% 38% 62% / 42% 58% 42% 58%;
+  }
+  100% {
+    border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
   }
 }
 
-/* Disable glitch effects */
-.glitch-text {
+.voice-core-orb {
+  animation: morph 8s ease-in-out infinite;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--purple) 100%);
   position: relative;
+  box-shadow: 0 0 60px rgba(99, 102, 241, 0.25);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.glitch-text::before,
-.glitch-text::after {
-  display: none !important;
+.voice-core-orb::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: morph 10s ease-in-out infinite reverse;
+  opacity: 0.7;
 }
 
-/* ── Premium Luxury Scrollytelling Styles ── */
-.text-outline-luxury {
-  -webkit-text-stroke: 2px rgba(15, 23, 42, 0.04);
-  color: transparent;
-  text-transform: uppercase;
+/* ── Floating Navigation Dock ── */
+.floating-dock-container {
+  position: fixed;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  pointer-events: auto;
 }
 
-.text-secondary-outline {
-  color: #312e81 !important;
-  -webkit-text-stroke: none !important;
-  text-shadow: none !important;
-  font-family: 'Outfit', 'Inter', sans-serif !important;
-  font-weight: 400 !important;
+/* ── Micro-interactions & Smooth Transitions ── */
+.hover-scale {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
 }
 
-.molten-border {
-  border-image: linear-gradient(135deg, rgba(245, 158, 11, 0.3) 0%, rgba(245, 158, 11, 0) 50%, rgba(249, 115, 22, 0.3) 100%) 1;
+.hover-scale:hover {
+  transform: scale(1.03);
 }
 
+.hover-scale:active {
+  transform: scale(0.98);
+}
+
+.text-glow {
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+}
+
+.light .text-glow {
+  text-shadow: none;
+}
+
+/* ── Awwwards Slide and Fade Animations ── */
+.fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Molten Glow Details ── */
 .molten-glow-orange {
   background: radial-gradient(circle at center, rgba(245, 158, 11, 0.08) 0%, rgba(245, 158, 11, 0) 70%);
 }
 
-@keyframes float-slow {
-
-  0%,
-  100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-
-  50% {
-    transform: translateY(-15px) rotate(4deg);
-  }
-}
-
-@keyframes float-reverse {
-
-  0%,
-  100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-
-  50% {
-    transform: translateY(15px) rotate(-4deg);
-  }
-}
-
 .animate-float-slow {
-  animation: float-slow 7s ease-in-out infinite;
+  animation: float-slow 12s ease-in-out infinite;
 }
 
-.animate-float-reverse {
-  animation: float-reverse 8s ease-in-out infinite;
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.03);
+  }
 }
