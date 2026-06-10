@@ -42,3 +42,55 @@ export interface HistoryItem {
   detectedLanguageName?: string;
 }
 
+export type AppPage =
+  | 'dashboard'
+  | 'translator'
+  | 'conversation'
+  | 'analytics'
+  | 'projects'
+  | 'files'
+  | 'history'
+  | 'settings'
+  | 'profile'
+  | 'notifications'
+  | 'help';
+
+export interface Project {
+  id: string;
+  name: string;
+  description: string;
+  createdAt: number;
+  sessionsCount: number;
+  tags: string[];
+}
+
+export interface FileItem {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  uploadedAt: number;
+  content: string;
+  translatedContent?: string;
+  status: 'idle' | 'translating' | 'completed' | 'failed';
+}
+
+export interface NotificationItem {
+  id: string;
+  title: string;
+  message: string;
+  timestamp: number;
+  read: boolean;
+  type: 'info' | 'success' | 'warning' | 'alert';
+}
+
+export interface Integration {
+  id: string;
+  name: string;
+  description: string;
+  connected: boolean;
+  apiKey?: string;
+  logo: string;
+}
+
+

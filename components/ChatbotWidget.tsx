@@ -86,32 +86,32 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
   };
 
   const chatContainerCls = isInline
-    ? "h-full w-full flex flex-col bg-white border border-slate-200 rounded-2xl text-slate-800 font-sans text-xs"
-    : "w-[calc(100vw-2rem)] max-w-[360px] sm:max-w-[400px] h-[500px] max-h-[80vh] bg-white border border-slate-200 rounded-2xl shadow-2xl flex flex-col overflow-hidden font-sans text-xs";
+    ? "h-full w-full flex flex-col bg-surface text-foreground border border-border rounded-2xl text-xs font-sans"
+    : "w-[calc(100vw-2rem)] max-w-[360px] sm:max-w-[400px] h-[500px] max-h-[80vh] bg-surface text-foreground border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden font-sans text-xs z-50";
 
   return (
     <div className={chatContainerCls}>
       {/* Header */}
-      <div className="bg-white border-b border-slate-100 text-slate-900 px-5 py-4 flex items-center justify-between shadow-sm flex-shrink-0">
+      <div className="bg-surface border-b border-border text-foreground px-5 py-4 flex items-center justify-between shadow-sm flex-shrink-0">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-indigo-500 rounded-full animate-ping" />
+          <div className="w-2 h-2 bg-[#44b3cc] rounded-full animate-ping" />
           <h3 className="font-extrabold text-[11px] tracking-wider uppercase font-sans">AI Translation Assistant</h3>
         </div>
         {onClose && (
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer" aria-label="Close">
+          <button onClick={onClose} className="text-zinc-400 hover:text-white transition-colors cursor-pointer" aria-label="Close">
             <CloseIcon className="w-5 h-5" />
           </button>
         )}
       </div>
 
       {/* Messages */}
-      <div className="flex-grow p-4 overflow-y-auto space-y-4 scrollbar-thin bg-slate-50/50">
+      <div className="flex-grow p-4 overflow-y-auto space-y-4 scrollbar-thin bg-black/5 dark:bg-black/10">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in duration-200`}>
             <div className={`max-w-[85%] px-4 py-2.5 border text-xs leading-relaxed rounded-2xl shadow-sm ${
               msg.role === 'user'
-                ? 'bg-indigo-600 text-white border-indigo-600 rounded-br-none'
-                : 'bg-white text-slate-800 border-slate-200 rounded-bl-none'
+                ? 'bg-[#44b3cc] text-white border-[#44b3cc] rounded-br-none'
+                : 'bg-card text-foreground border-border rounded-bl-none'
             }`}>
               <p className="whitespace-pre-wrap">{msg.content}</p>
             </div>
@@ -120,15 +120,15 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
 
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-white text-slate-400 px-4 py-2.5 border border-slate-200 rounded-2xl rounded-bl-none flex items-center gap-2">
-              <SpinnerIcon className="w-4 h-4 animate-spin text-indigo-500" />
+            <div className="bg-card text-zinc-400 px-4 py-2.5 border border-border rounded-2xl rounded-bl-none flex items-center gap-2">
+              <SpinnerIcon className="w-4 h-4 animate-spin text-[#44b3cc]" />
               <span className="text-[10px] font-semibold uppercase animate-pulse">AI is thinking...</span>
             </div>
           </div>
         )}
 
         {error && (
-          <div className="text-red-500 text-[10px] text-center font-medium bg-red-50 p-2.5 border border-red-200 rounded-xl">
+          <div className="text-red-500 text-[10px] text-center font-medium bg-red-950/10 p-2.5 border border-red-500/20 rounded-xl">
             Error: {error}
           </div>
         )}
@@ -138,16 +138,16 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
 
       {/* Quick Context Action Buttons */}
       {messages.length < 5 && !isLoading && (
-        <div className="px-4 pb-2 pt-2 flex flex-wrap gap-2 justify-center flex-shrink-0 bg-slate-50 border-t border-slate-100 font-sans">
+        <div className="px-4 pb-2 pt-2 flex flex-wrap gap-2 justify-center flex-shrink-0 bg-transparent border-t border-border font-sans">
           <button
             onClick={() => handleQuickAction("Explain some common metaphors and idioms across different languages.")}
-            className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-[10px] text-slate-700 font-bold transition-all shadow-sm cursor-pointer"
+            className="px-3 py-1.5 rounded-lg border border-border bg-card hover:bg-zinc-800/10 text-[10px] text-[#44b3cc] font-bold transition-all shadow-sm cursor-pointer"
           >
             💡 Idioms Guide
           </button>
           <button
             onClick={() => handleQuickAction("Give me tips for formal versus informal speech when speaking French, German, or Japanese.")}
-            className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-[10px] text-slate-700 font-bold transition-all shadow-sm cursor-pointer"
+            className="px-3 py-1.5 rounded-lg border border-border bg-card hover:bg-zinc-800/10 text-[10px] text-[#44b3cc] font-bold transition-all shadow-sm cursor-pointer"
           >
             🗣️ Speech Registers
           </button>
@@ -155,19 +155,19 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
       )}
 
       {/* Input Form */}
-      <form onSubmit={handleSend} className="p-3 bg-white border-t border-slate-150 flex gap-2 flex-shrink-0">
+      <form onSubmit={handleSend} className="p-3 bg-surface border-t border-border flex gap-2 flex-shrink-0">
         <input
           type="text"
           value={inputValue}
           onChange={e => setInputValue(e.target.value)}
           placeholder="Ask a question..."
           disabled={isLoading}
-          className="flex-grow px-3 py-2 border border-slate-200 rounded-lg text-slate-900 text-xs focus:ring-1 focus:ring-indigo-500 outline-none placeholder-slate-400 font-sans"
+          className="flex-grow px-3 py-2 border border-border bg-card text-foreground rounded-lg text-xs focus:ring-1 focus:ring-[#44b3cc] outline-none placeholder-zinc-500 font-sans"
         />
         <button
           type="submit"
           disabled={isLoading || !inputValue.trim()}
-          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-colors shadow-sm disabled:opacity-50"
+          className="px-4 py-2 bg-[#44b3cc] hover:bg-[#2896b2] text-white rounded-lg text-xs font-bold transition-colors shadow-sm disabled:opacity-50"
         >
           Send
         </button>

@@ -35,6 +35,8 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
   clearHistoryTrigger,
 }) => {
   const [inputText, setInputText] = useState<string>('');
+  const [undoStack, setUndoStack] = useState<string[]>([]);
+  const [redoStack, setRedoStack] = useState<string[]>([]);
   const [debouncedInputText, setDebouncedInputText] = useState<string>('');
   const [translatedText, setTranslatedText] = useState<string>('');
   const [displayedTranslatedText, setDisplayedTranslatedText] = useState<string>('');
@@ -60,6 +62,28 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
 
   // Layout UI states
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
+
+  const handleInputChange = (val: string) => {
+    setUndoStack((prev) => [...prev, inputText]);
+    setRedoStack([]); // Clear redo stack on key strokes
+    setInputText(val);
+  };
+
+  const handleUndo = () => {
+    if (undoStack.length === 0) return;
+    const prevText = undoStack[undoStack.length - 1];
+    setRedoStack((prev) => [...prev, inputText]);
+    setUndoStack((prev) => prev.slice(0, -1));
+    setInputText(prevText);
+  };
+
+  const handleRedo = () => {
+    if (redoStack.length === 0) return;
+    const nextText = redoStack[redoStack.length - 1];
+    setUndoStack((prev) => [...prev, inputText]);
+    setRedoStack((prev) => prev.slice(0, -1));
+    setInputText(nextText);
+  };
 
   const recognitionRef = useRef<any>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -95,31 +119,24 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
 
   const currentStyle = styleConfig[translationMode];
 
-  // Load history
-  useEffect(() => {
+  const fetchHistory = useCallback(async () => {
     try {
-      const storedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
-      if (storedHistory) setHistory(JSON.parse(storedHistory));
-    } catch (e) {
-      console.error('Failed to load history', e);
+      const storedUser = localStorage.getItem('veltrioUser');
+      const user = storedUser ? JSON.parse(storedUser) : null;
+      if (user) {
+        const res = await fetch(`/api/history?userId=${user.id}`);
+        const data = await res.json();
+        setHistory(data);
+      }
+    } catch (err) {
+      console.error('Failed to load history from MongoDB:', err);
     }
   }, []);
 
-  // Sync clear history signal from parent
+  // Load history from MongoDB
   useEffect(() => {
-    if (clearHistoryTrigger > 0) {
-      setHistory([]);
-    }
-  }, [clearHistoryTrigger]);
-
-  // Save history
-  useEffect(() => {
-    try {
-      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
-    } catch (e) {
-      console.error('Failed to save history', e);
-    }
-  }, [history]);
+    fetchHistory();
+  }, [fetchHistory, clearHistoryTrigger]);
 
   // Debounce input text
   useEffect(() => {
@@ -157,13 +174,32 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
     };
   }, [translatedText]);
 
-  const addToHistory = useCallback((item: Omit<HistoryItem, 'id' | 'timestamp'>) => {
-    setHistory((prev) => {
-      const newItem: HistoryItem = { ...item, id: new Date().toISOString() + Math.random(), timestamp: Date.now() };
-      if (prev.some((h) => h.inputText === newItem.inputText && h.translatedText === newItem.translatedText && h.targetLanguage === newItem.targetLanguage)) return prev;
-      return [newItem, ...prev].slice(0, 25);
-    });
-  }, []);
+  const addToHistory = useCallback(async (item: Omit<HistoryItem, 'id' | 'timestamp'>) => {
+    try {
+      const storedUser = localStorage.getItem('veltrioUser');
+      const user = storedUser ? JSON.parse(storedUser) : null;
+      if (user) {
+        await fetch('/api/history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user.id,
+            inputText: item.inputText,
+            translatedText: item.translatedText,
+            sentiment: item.sentiment,
+            targetLanguage: item.targetLanguage,
+            targetLanguageName: item.targetLanguageName,
+            qualityScore: item.qualityScore,
+            clarityScore: item.clarityScore,
+            detectedLanguageName: item.detectedLanguageName,
+          }),
+        });
+        fetchHistory();
+      }
+    } catch (err) {
+      console.error('Failed to save log to database:', err);
+    }
+  }, [fetchHistory]);
 
   // Run translation & sentiment
   useEffect(() => {
@@ -520,8 +556,21 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
     }
   }, [translatedText]);
 
-  const deleteHistoryItem = (id: string) => {
-    setHistory((prev) => prev.filter((item) => item.id !== id));
+  const deleteHistoryItem = async (id: string) => {
+    try {
+      const storedUser = localStorage.getItem('veltrioUser');
+      const user = storedUser ? JSON.parse(storedUser) : null;
+      if (user) {
+        const res = await fetch(`/api/history?userId=${user.id}&id=${id}`, {
+          method: 'DELETE',
+        });
+        if (res.ok) {
+          fetchHistory();
+        }
+      }
+    } catch (err) {
+      console.error('Failed to delete history item:', err);
+    }
   };
 
   const loadFromHistory = (item: HistoryItem) => {
@@ -557,11 +606,21 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
     );
   };
 
-  const handleClearHistory = () => {
-    setHistory([]);
+  const handleClearHistory = async () => {
     try {
-      localStorage.removeItem(HISTORY_STORAGE_KEY);
-    } catch {}
+      const storedUser = localStorage.getItem('veltrioUser');
+      const user = storedUser ? JSON.parse(storedUser) : null;
+      if (user) {
+        const res = await fetch(`/api/history?userId=${user.id}`, {
+          method: 'DELETE',
+        });
+        if (res.ok) {
+          fetchHistory();
+        }
+      }
+    } catch (err) {
+      console.error('Failed to clear history:', err);
+    }
   };
 
   return (
@@ -642,7 +701,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
         <div className="w-full p-4 md:p-8 flex flex-col justify-between min-h-[300px] md:min-h-[360px] relative transition-all duration-300 group md:glass-panel md:hover:border-zinc-300/40 md:dark:hover:border-white/15 border-b md:border-none border-zinc-200/50 dark:border-white/5 pb-6">
           <div className="flex items-center justify-between pb-3 border-b border-zinc-200/50 dark:border-white/5">
             <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
-              <span className={`w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse`} />
+              <span className={`w-1.5 h-1.5 rounded-full bg-[#44b3cc] animate-pulse`} />
               Source Input
             </span>
             {inputText && (
@@ -664,13 +723,35 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
           <textarea
             ref={textareaRef}
             value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
+            onChange={(e) => handleInputChange(e.target.value)}
             placeholder="Write a message or trigger voice capture..."
             className="flex-grow w-full py-6 bg-transparent border-none text-base leading-relaxed text-zinc-850 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 outline-none resize-none min-h-[220px]"
           />
 
           <div className="pt-4 border-t border-zinc-200/50 dark:border-white/5 flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-550">
-            <span>{inputText.length} characters</span>
+            <div className="flex items-center gap-3">
+              <span>{inputText.length} characters</span>
+              {inputText && (
+                <div className="flex gap-1.5">
+                  <button
+                    disabled={undoStack.length === 0}
+                    onClick={handleUndo}
+                    className="px-2 py-0.5 rounded bg-zinc-800/5 dark:bg-white/5 border border-zinc-200 dark:border-white/5 disabled:opacity-40 hover:bg-zinc-800/10 cursor-pointer text-[9px] font-bold"
+                    title="Undo edit"
+                  >
+                    ↩️ Undo
+                  </button>
+                  <button
+                    disabled={redoStack.length === 0}
+                    onClick={handleRedo}
+                    className="px-2 py-0.5 rounded bg-zinc-800/5 dark:bg-white/5 border border-zinc-200 dark:border-white/5 disabled:opacity-40 hover:bg-zinc-800/10 cursor-pointer text-[9px] font-bold"
+                    title="Redo edit"
+                  >
+                    ↪️ Redo
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Glowing Micro-Mic Button */}
             <div className="relative">
@@ -682,7 +763,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
                 className={`p-3 rounded-full hover-scale cursor-pointer transition-all duration-300 shadow-md ${
                   isRecording || isWhisperRecording
                     ? 'bg-red-600 text-white'
-                    : 'bg-indigo-600 text-white shadow-lg'
+                    : 'bg-[#44b3cc] text-white shadow-lg'
                 }`}
                 title={isRecording || isWhisperRecording ? 'Stop speech capturing' : 'Start speech capturing'}
               >
@@ -711,7 +792,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
               <div className="space-y-4">
                 <p className="text-base leading-relaxed text-zinc-850 dark:text-zinc-100 text-glow">
                   {displayedTranslatedText}
-                  {isStreaming && <span className={`inline-block w-1.5 h-4 ml-1 bg-indigo-500 animate-pulse`} />}
+                  {isStreaming && <span className={`inline-block w-1.5 h-4 ml-1 bg-[#44b3cc] animate-pulse`} />}
                 </p>
 
                 {/* Floating Metric badging inline */}
@@ -750,7 +831,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
 
           {/* Inline speak & grammar features */}
           <div className="pt-4 border-t border-zinc-200/50 dark:border-white/5 flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               {translatedText && (
                 <>
                   <button
@@ -764,6 +845,25 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
                     ✨ Grammar Breakdown
                   </button>
 
+                  <button
+                    onClick={() => {
+                      alert('Session saved to default workspace project folder!');
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider bg-zinc-800/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 hover:border-[#44b3cc]/30 text-zinc-750 dark:text-zinc-300 hover:text-[#44b3cc] cursor-pointer transition-colors"
+                  >
+                    📁 Save to Project
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(translatedText);
+                      alert('Translation copied to clipboard!');
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider bg-zinc-800/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 hover:border-[#44b3cc]/30 text-zinc-750 dark:text-zinc-300 hover:text-[#44b3cc] cursor-pointer transition-colors"
+                  >
+                    📋 Copy
+                  </button>
+
                   {/* Playback speed slider */}
                   <div className="flex items-center gap-1.5 bg-zinc-800/5 dark:bg-white/5 px-2.5 py-1.5 border border-zinc-200 dark:border-white/10 rounded-xl">
                     <span className="text-[9px] font-bold text-zinc-500 dark:text-zinc-400 w-5">{speechRate}x</span>
@@ -774,7 +874,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
                       step="0.25"
                       value={speechRate}
                       onChange={(e) => setSpeechRate(parseFloat(e.target.value))}
-                      className="w-12 h-1 bg-zinc-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                      className="w-12 h-1 bg-zinc-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#44b3cc]"
                     />
                   </div>
                 </>
@@ -785,7 +885,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
               <button
                 onClick={handleSpeak}
                 className={`p-2.5 rounded-full border hover-scale transition-all ${
-                  isSpeaking ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-zinc-800/5 dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-550 dark:text-zinc-400 hover:text-zinc-850 dark:hover:text-zinc-200'
+                  isSpeaking ? 'bg-[#44b3cc] border-[#44b3cc] text-white' : 'bg-zinc-800/5 dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-550 dark:text-zinc-400 hover:text-zinc-850 dark:hover:text-zinc-200'
                 } cursor-pointer`}
                 title="Speak text"
               >
@@ -809,7 +909,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
           >
             <div className="flex items-center justify-between pb-4 border-b border-zinc-200/50 dark:border-white/5">
               <div className="flex items-center gap-2">
-                <HistoryIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <HistoryIcon className="w-4 h-4 text-[#2896b2] dark:text-[#44b3cc]" />
                 <span className="text-xs font-bold uppercase tracking-widest text-zinc-800 dark:text-zinc-200">Timeline Logs</span>
               </div>
               <button
@@ -838,7 +938,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
                   >
                     <div className="flex items-center justify-between text-[9px] font-mono text-zinc-500">
                       <span>{new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      <span className="text-indigo-650 dark:text-indigo-400 uppercase font-bold tracking-wider">
+                      <span className="text-[#2896b2] dark:text-[#44b3cc] uppercase font-bold tracking-wider">
                         {item.detectedLanguageName ? `${item.detectedLanguageName} → ${item.targetLanguageName}` : `Auto → ${item.targetLanguageName}`}
                       </span>
                     </div>

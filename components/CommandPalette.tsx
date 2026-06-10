@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LANGUAGES } from '../constants';
 
+import { AppPage } from '../types';
+
 interface CommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectMode: (mode: 'translator' | 'conversation') => void;
+  onSelectMode: (mode: AppPage) => void;
   onSelectTargetLanguage: (code: string) => void;
   onSelectSourceLanguage: (code: string) => void;
   onSelectStyle: (style: 'native' | 'industrial' | 'customer') => void;
@@ -57,6 +59,15 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
   const getCommands = (): CommandItem[] => {
     const list: CommandItem[] = [
       {
+        id: 'go-dashboard',
+        category: 'Navigation',
+        name: 'Go to Dashboard',
+        description: 'Open the workspace metrics and stats dashboard',
+        syntax: '/go dashboard',
+        icon: '🏠',
+        action: () => onSelectMode('dashboard'),
+      },
+      {
         id: 'mode-written',
         category: 'Navigation',
         name: 'Switch to Written Link',
@@ -73,6 +84,79 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
         syntax: '/mode voice',
         icon: '🎙️',
         action: () => onSelectMode('conversation'),
+      },
+      {
+        id: 'go-analytics',
+        category: 'Navigation',
+        name: 'Go to Analytics',
+        description: 'View translation quality, readability, and sentiment charts',
+        syntax: '/go analytics',
+        icon: '📊',
+        action: () => onSelectMode('analytics'),
+      },
+      {
+        id: 'go-projects',
+        category: 'Navigation',
+        name: 'Go to Projects',
+        description: 'Browse workspace project folders',
+        syntax: '/go projects',
+        icon: '📁',
+        action: () => onSelectMode('projects'),
+      },
+      {
+        id: 'go-files',
+        category: 'Navigation',
+        name: 'Go to File Manager',
+        description: 'Upload, download, or batch translate text documents',
+        syntax: '/go files',
+        icon: '🗂️',
+        action: () => onSelectMode('files'),
+      },
+      {
+        id: 'go-history',
+        category: 'Navigation',
+        name: 'Go to History Timeline',
+        description: 'Search and replay past translations and sessions logs',
+        syntax: '/go history',
+        icon: '🕐',
+        action: () => onSelectMode('history'),
+      },
+
+      {
+        id: 'go-settings',
+        category: 'Navigation',
+        name: 'Go to Settings',
+        description: 'Configure theme themes, animations, and system preferences',
+        syntax: '/go settings',
+        icon: '⚙️',
+        action: () => onSelectMode('settings'),
+      },
+      {
+        id: 'go-profile',
+        category: 'Navigation',
+        name: 'Go to Profile',
+        description: 'Edit operator metadata or configure API tokens',
+        syntax: '/go profile',
+        icon: '👤',
+        action: () => onSelectMode('profile'),
+      },
+      {
+        id: 'go-notifications',
+        category: 'Navigation',
+        name: 'Go to Notifications',
+        description: 'Browse system alerts and AI copilot advice list',
+        syntax: '/go notifications',
+        icon: '🔔',
+        action: () => onSelectMode('notifications'),
+      },
+      {
+        id: 'go-help',
+        category: 'Navigation',
+        name: 'Go to Help & FAQs',
+        description: 'Open tutorials, FAQ accordions, and shortcut references',
+        syntax: '/go help',
+        icon: '❓',
+        action: () => onSelectMode('help'),
       },
       {
         id: 'style-native',

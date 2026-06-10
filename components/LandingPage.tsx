@@ -480,16 +480,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, theme, toggleTheme }
   };
 
   return (
-    <div className="relative w-full min-h-screen text-foreground font-sans selection:bg-indigo-500 selection:text-white flex flex-col z-0 transition-colors duration-1000">
+    <div className="relative w-full min-h-screen text-foreground font-sans selection:bg-[#44b3cc] selection:text-white flex flex-col z-0 transition-colors duration-1000">
       
       {/* Immersive Loader overlay */}
       {showLoader && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-zinc-950 text-zinc-100 transition-opacity duration-1000">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.06),transparent_70%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(68,179,204,0.06),transparent_70%)]" />
           <div className="relative z-10 flex flex-col items-center max-w-md w-full px-8 text-center space-y-8">
             <div className="relative">
-              <div className="absolute -inset-4 bg-indigo-500/20 rounded-full blur-xl animate-pulse" />
-              <div className="relative w-14 h-14 bg-gradient-to-br from-indigo-500 via-purple-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-xl p-2.5">
+              <div className="absolute -inset-4 bg-[#44b3cc]/20 rounded-full blur-xl animate-pulse" />
+              <div className="relative w-14 h-14 bg-gradient-to-br from-[#44b3cc] via-[#2782a0] to-[#2896b2] rounded-2xl flex items-center justify-center shadow-xl p-2.5">
                 <span className="text-white font-extrabold text-2xl font-sans tracking-tighter">V</span>
               </div>
             </div>
@@ -498,21 +498,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, theme, toggleTheme }
               <h2 className="text-lg font-black tracking-[0.25em] uppercase text-white font-sans">
                 Veltrio
               </h2>
-              <p className="text-[9px] uppercase tracking-[0.3em] text-indigo-400 font-mono animate-pulse">
+              <p className="text-[9px] uppercase tracking-[0.3em] text-[#44b3cc] font-mono animate-pulse">
                 {loaderText}
               </p>
             </div>
 
             <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 rounded-full transition-all duration-75"
+                className="h-full bg-gradient-to-r from-[#44b3cc] via-[#2782a0] to-[#2896b2] rounded-full transition-all duration-75"
                 style={{ width: `${loaderProgress}%` }}
               />
             </div>
 
             <div className="flex justify-between items-center w-full text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
               <span>Initializing Core</span>
-              <span className="text-indigo-400 font-bold">{loaderProgress}%</span>
+              <span className="text-[#44b3cc] font-bold">{loaderProgress}%</span>
             </div>
           </div>
         </div>
@@ -613,7 +613,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, theme, toggleTheme }
                           <button
                             onClick={handleSandboxTranslate}
                             disabled={sandboxIsTranslating || !sandboxText.trim()}
-                            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-full text-[9px] font-bold uppercase tracking-[0.15em] text-white transition-all shadow-lg flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                            className="px-6 py-3 bg-[#44b3cc] hover:bg-[#2896b2] rounded-full text-[9px] font-bold uppercase tracking-[0.15em] text-white transition-all shadow-lg flex items-center gap-2 cursor-pointer disabled:opacity-50"
                           >
                             {sandboxIsTranslating ? (
                               <>
@@ -635,7 +635,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, theme, toggleTheme }
                                   {/* Translation result */}
                                   {sandboxTranslated && (
                                     <div>
-                                      <span className="text-[8px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Output translation</span>
+                                      <span className="text-[8px] font-bold text-[#2896b2] dark:text-[#44b3cc] uppercase tracking-wider">Output translation</span>
                                       <p className="text-xs text-zinc-900 dark:text-white font-semibold mt-0.5">{sandboxTranslated}</p>
                                     </div>
                                   )}
@@ -725,7 +725,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, theme, toggleTheme }
                           <button
                             onClick={handleSandboxTranslate}
                             disabled={sandboxIsTranslating || !sandboxText.trim()}
-                            className="self-start px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-[10px] font-bold uppercase tracking-wider text-white transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                            className="self-start px-5 py-2.5 bg-[#44b3cc] hover:bg-[#2896b2] rounded-xl text-[10px] font-bold uppercase tracking-wider text-white transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50"
                           >
                             {sandboxIsTranslating ? (
                               <>
@@ -747,7 +747,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, theme, toggleTheme }
                                   {/* Translation result */}
                                   {sandboxTranslated && (
                                     <div>
-                                      <span className="text-[8px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">Output translation</span>
+                                      <span className="text-[8px] font-bold text-[#2896b2] dark:text-[#44b3cc] uppercase tracking-wider">Output translation</span>
                                       <p className="text-xs text-zinc-900 dark:text-white font-semibold mt-0.5">{sandboxTranslated}</p>
                                     </div>
                                   )}
