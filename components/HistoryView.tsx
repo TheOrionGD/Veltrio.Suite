@@ -129,7 +129,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({
             return (
               <div
                 key={item.id}
-                className="glass-panel p-5 space-y-4 hover:border-[#44b3cc]/30 transition-all flex flex-col justify-between"
+                className="glass-panel p-5 space-y-4 hover:border-accent/30 transition-all flex flex-col justify-between"
               >
                 <div className="flex justify-between items-start gap-4">
                   <div className="space-y-1">
@@ -173,7 +173,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleReplay(item)}
-                      className="px-3 py-1.5 bg-[#44b3cc]/10 hover:bg-[#44b3cc] text-[#2896b2] dark:text-[#44b3cc] hover:text-white rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                      className="px-3 py-1.5 bg-accent/10 hover:bg-accent text-primary dark:text-accent hover:text-white rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
                     >
                       Replay in written workspace
                     </button>

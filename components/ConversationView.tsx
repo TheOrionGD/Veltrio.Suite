@@ -297,8 +297,8 @@ const ConversationView: React.FC<ConversationViewProps> = ({
 
   // Color mappings for pulsing Voice Core Orb
   const orbGlowColor = {
-    idle: 'from-[#44b3cc]/30 to-[#2896b2]/30 hover:scale-[1.03]',
-    recording: 'from-[#44b3cc]/60 to-[#2782a0]/60 scale-[1.08] shadow-[0_0_80px_rgba(68,179,204,0.45)]',
+    idle: 'from-accent/30 to-primary/30 hover:scale-[1.03]',
+    recording: 'from-accent/60 to-purple/60 scale-[1.08] shadow-[0_0_80px_rgba(68,179,204,0.45)]',
     processing: 'from-amber-500/50 to-orange-500/50 scale-[1.05] shadow-[0_0_80px_rgba(245,158,11,0.35)]',
     speaking: 'from-emerald-500/60 to-teal-500/60 scale-[1.07] shadow-[0_0_80px_rgba(16,185,129,0.4)]',
     error: 'from-red-600/50 to-pink-600/50',
@@ -413,7 +413,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
           >
             <div className="flex items-center justify-between pb-4 border-b border-zinc-200/50 dark:border-white/5">
               <div className="flex items-center gap-2">
-                <HistoryIcon className="w-4 h-4 text-[#2896b2] dark:text-[#44b3cc]" />
+                <HistoryIcon className="w-4 h-4 text-primary dark:text-accent" />
                 <span className="text-xs font-bold uppercase tracking-widest text-zinc-800 dark:text-zinc-200">Conversation Logs</span>
               </div>
               <button
@@ -439,7 +439,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
                     <div
                       className={`max-w-[85%] px-4 py-2.5 border rounded-2xl text-xs leading-relaxed ${
                         entry.speaker === 'You'
-                          ? 'bg-[#44b3cc] text-white border-[#44b3cc] rounded-br-none shadow-sm'
+                          ? 'bg-accent text-white border-accent rounded-br-none shadow-sm'
                           : 'bg-zinc-800/5 dark:bg-white/5 text-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-white/10 rounded-bl-none'
                       } flex items-center gap-2.5`}
                     >
@@ -480,7 +480,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
                     );
                     setIsLogsOpen(false);
                   }}
-                  className="w-full py-2.5 bg-[#44b3cc] hover:bg-[#2896b2] text-white text-[10px] font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer shadow-md"
+                  className="w-full py-2.5 bg-accent hover:bg-primary text-white text-[10px] font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer shadow-md"
                 >
                   ✨ Analyze Conversation
                 </button>

@@ -12,6 +12,7 @@ import NotificationsView from './components/NotificationsView';
 import HelpView from './components/HelpView';
 import LandingPage from './components/LandingPage';
 import ChatbotWidget from './components/ChatbotWidget';
+import FloatingWindow from './components/FloatingWindow';
 import CommandPalette from './components/CommandPalette';
 import { HistoryItem, NotificationItem, AppPage } from './types';
 import AuthPage from './components/AuthPage';
@@ -82,23 +83,31 @@ const App: React.FC = () => {
     const applyAccent = () => {
       const activeColor = currentUser?.preferences?.accentColor || localStorage.getItem('accent_color') || 'teal';
       let hex = '#14b8a6'; // default Teal
+      let primaryHex = '#0f766e'; // default dark teal
+      let purpleHex = '#0f766e';
+      
       if (activeColor === 'custom') {
         hex = currentUser?.preferences?.customAccentColor || localStorage.getItem('custom_accent_color') || '#44b3cc';
+        primaryHex = hex;
+        purpleHex = hex;
       } else {
         const swatches = [
-          { id: 'indigo', hex: '#6366f1', darkHex: '#818cf8' },
-          { id: 'sky', hex: '#0ea5e9', darkHex: '#38bdf8' },
-          { id: 'teal', hex: '#14b8a6', darkHex: '#2dd4bf' },
-          { id: 'coral', hex: '#f97316', darkHex: '#fb923c' },
-          { id: 'amber', hex: '#f59e0b', darkHex: '#fbbf24' },
-          { id: 'rose', hex: '#f43f5e', darkHex: '#fb7185' },
+          { id: 'indigo', hex: '#6366f1', darkHex: '#818cf8', deepHex: '#4f46e5' },
+          { id: 'sky', hex: '#0ea5e9', darkHex: '#38bdf8', deepHex: '#0284c7' },
+          { id: 'teal', hex: '#14b8a6', darkHex: '#2dd4bf', deepHex: '#0f766e' },
+          { id: 'coral', hex: '#f97316', darkHex: '#fb923c', deepHex: '#ea580c' },
+          { id: 'amber', hex: '#f59e0b', darkHex: '#fbbf24', deepHex: '#d97706' },
+          { id: 'rose', hex: '#f43f5e', darkHex: '#fb7185', deepHex: '#e11d48' },
         ];
-        const swatch = swatches.find((s) => s.id === activeColor);
-        if (swatch) {
-          hex = theme === 'dark' && swatch.darkHex ? swatch.darkHex : swatch.hex;
-        }
+        const swatch = swatches.find((s) => s.id === activeColor) || swatches[2];
+        hex = theme === 'dark' && swatch.darkHex ? swatch.darkHex : swatch.hex;
+        primaryHex = theme === 'dark' ? swatch.hex : swatch.deepHex;
+        purpleHex = swatch.deepHex;
       }
+      
       document.documentElement.style.setProperty('--accent', hex);
+      document.documentElement.style.setProperty('--primary', primaryHex);
+      document.documentElement.style.setProperty('--purple', purpleHex);
     };
 
     applyAccent();
@@ -415,7 +424,7 @@ const App: React.FC = () => {
       {/* Immersive Floating Ambient Light Elements */}
       <div className="ambient-bg">
         <div
-          className="ambient-glow bg-gradient-to-tr from-[#44b3cc]/20 via-[#2782a0]/15 to-[#2896b2]/10 animate-float-slow"
+          className="ambient-glow bg-gradient-to-tr from-accent/20 via-purple/15 to-primary/10 animate-float-slow"
           style={{
             transform: `translate(${page === 'conversation' ? 10 : -10}%, ${
               page === 'conversation' ? 5 : -5
@@ -450,7 +459,7 @@ const App: React.FC = () => {
 
       {/* sliding / floating AI Assistant overlay panel */}
       {isAssistantOpen && (
-        <div className="fixed bottom-48 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0 md:bottom-6 z-40 animate-in fade-in slide-in-from-bottom-5 duration-300">
+        <div className="fixed bottom-48 left-1/2 -translate-x-1/2 md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:left-6 md:right-auto md:translate-x-0 z-40 animate-in fade-in slide-in-from-left-5 duration-300">
           <ChatbotWidget
             isInline={false}
             isOpen={isAssistantOpen}
@@ -473,83 +482,76 @@ const App: React.FC = () => {
         onAskAI={handleAskAssistant}
       />
 
-      {/* Dynamic Glass Drawer Overlay Container */}
+      {/* Dynamic Floating Window Overlay Container */}
       {activeOverlay && (
         <>
           <div
             className="drawer-backdrop animate-in fade-in duration-300"
             onClick={() => setActiveOverlay(null)}
           />
-          <div className="glass-drawer drawer-open animate-in slide-in-from-right duration-500">
-            <div className="p-4 md:p-5 border-b border-zinc-200/50 dark:border-white/5 flex items-center justify-between">
-              <h2 className="text-xs font-black uppercase tracking-widest text-[#234556] dark:text-[#effbfc] flex items-center gap-2">
+          <FloatingWindow
+            title={
+              <>
                 {activeOverlay === 'analytics' && '📈 Session Analytics'}
                 {(activeOverlay === 'files' || activeOverlay === 'projects') && '🗂️ Project Workspace'}
                 {activeOverlay === 'history' && '🕐 History Timeline'}
-
                 {(activeOverlay === 'settings' || activeOverlay === 'profile') && '⚙️ System Control'}
                 {activeOverlay === 'notifications' && '🔔 System Alerts'}
                 {activeOverlay === 'help' && '❓ Documentation'}
-              </h2>
-
-              {/* Drawer tab switcher for combined pages */}
-              {(activeOverlay === 'files' || activeOverlay === 'projects') && (
-                <div className="flex bg-zinc-800/10 dark:bg-white/5 border border-zinc-200/40 dark:border-white/5 p-0.5 rounded-xl text-[9px] font-bold">
-                  <button
-                    onClick={() => setActiveOverlay('files')}
-                    className={`px-2 py-1 rounded-lg uppercase tracking-wider cursor-pointer transition-all ${
-                      activeOverlay === 'files' ? 'text-white shadow-sm' : 'text-zinc-555 dark:text-zinc-400'
-                    }`}
-                    style={activeOverlay === 'files' ? { backgroundColor: 'var(--accent)' } : undefined}
-                  >
-                    Files
-                  </button>
-                  <button
-                    onClick={() => setActiveOverlay('projects')}
-                    className={`px-2 py-1 rounded-lg uppercase tracking-wider cursor-pointer transition-all ${
-                      activeOverlay === 'projects' ? 'text-white shadow-sm' : 'text-zinc-555 dark:text-zinc-400'
-                    }`}
-                    style={activeOverlay === 'projects' ? { backgroundColor: 'var(--accent)' } : undefined}
-                  >
-                    Projects
-                  </button>
-                </div>
-              )}
-
-              {(activeOverlay === 'settings' || activeOverlay === 'profile') && (
-                <div className="flex bg-zinc-800/10 dark:bg-white/5 border border-zinc-200/40 dark:border-white/5 p-0.5 rounded-xl text-[9px] font-bold">
-                  <button
-                    onClick={() => setActiveOverlay('settings')}
-                    className={`px-2 py-1 rounded-lg uppercase tracking-wider cursor-pointer transition-all ${
-                      activeOverlay === 'settings' ? 'text-white shadow-sm' : 'text-zinc-555 dark:text-zinc-400'
-                    }`}
-                    style={activeOverlay === 'settings' ? { backgroundColor: 'var(--accent)' } : undefined}
-                  >
-                    Prefs
-                  </button>
-                  <button
-                    onClick={() => setActiveOverlay('profile')}
-                    className={`px-2 py-1 rounded-lg uppercase tracking-wider cursor-pointer transition-all ${
-                      activeOverlay === 'profile' ? 'text-white shadow-sm' : 'text-zinc-555 dark:text-zinc-400'
-                    }`}
-                    style={activeOverlay === 'profile' ? { backgroundColor: 'var(--accent)' } : undefined}
-                  >
-                    Account
-                  </button>
-                </div>
-              )}
-
-              <button
-                onClick={() => setActiveOverlay(null)}
-                className="text-zinc-450 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded-lg hover:bg-zinc-800/5 dark:hover:bg-white/5 transition-colors cursor-pointer text-xs font-black font-mono"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="flex-grow overflow-y-auto p-4 pb-36 md:p-5 md:pb-5 scrollbar-thin">
-              {renderOverlayContent()}
-            </div>
-          </div>
+              </>
+            }
+            onClose={() => setActiveOverlay(null)}
+            headerTabs={
+              <>
+                {(activeOverlay === 'files' || activeOverlay === 'projects') && (
+                  <div className="flex bg-zinc-800/10 dark:bg-white/5 border border-zinc-200/40 dark:border-white/5 p-0.5 rounded-xl text-[9px] font-bold">
+                    <button
+                      onClick={() => setActiveOverlay('files')}
+                      className={`px-2 py-1 rounded-lg uppercase tracking-wider cursor-pointer transition-all ${
+                        activeOverlay === 'files' ? 'text-white shadow-sm' : 'text-zinc-555 dark:text-zinc-400'
+                      }`}
+                      style={activeOverlay === 'files' ? { backgroundColor: 'var(--accent)' } : undefined}
+                    >
+                      Files
+                    </button>
+                    <button
+                      onClick={() => setActiveOverlay('projects')}
+                      className={`px-2 py-1 rounded-lg uppercase tracking-wider cursor-pointer transition-all ${
+                        activeOverlay === 'projects' ? 'text-white shadow-sm' : 'text-zinc-555 dark:text-zinc-400'
+                      }`}
+                      style={activeOverlay === 'projects' ? { backgroundColor: 'var(--accent)' } : undefined}
+                    >
+                      Projects
+                    </button>
+                  </div>
+                )}
+                {(activeOverlay === 'settings' || activeOverlay === 'profile') && (
+                  <div className="flex bg-zinc-800/10 dark:bg-white/5 border border-zinc-200/40 dark:border-white/5 p-0.5 rounded-xl text-[9px] font-bold">
+                    <button
+                      onClick={() => setActiveOverlay('settings')}
+                      className={`px-2 py-1 rounded-lg uppercase tracking-wider cursor-pointer transition-all ${
+                        activeOverlay === 'settings' ? 'text-white shadow-sm' : 'text-zinc-555 dark:text-zinc-400'
+                      }`}
+                      style={activeOverlay === 'settings' ? { backgroundColor: 'var(--accent)' } : undefined}
+                    >
+                      Prefs
+                    </button>
+                    <button
+                      onClick={() => setActiveOverlay('profile')}
+                      className={`px-2 py-1 rounded-lg uppercase tracking-wider cursor-pointer transition-all ${
+                        activeOverlay === 'profile' ? 'text-white shadow-sm' : 'text-zinc-555 dark:text-zinc-400'
+                      }`}
+                      style={activeOverlay === 'profile' ? { backgroundColor: 'var(--accent)' } : undefined}
+                    >
+                      Account
+                    </button>
+                  </div>
+                )}
+              </>
+            }
+          >
+            {renderOverlayContent()}
+          </FloatingWindow>
         </>
       )}
 

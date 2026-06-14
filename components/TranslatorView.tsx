@@ -701,7 +701,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
         <div className="w-full p-4 md:p-8 flex flex-col justify-between min-h-[300px] md:min-h-[360px] relative transition-all duration-300 group md:glass-panel md:hover:border-zinc-300/40 md:dark:hover:border-white/15 border-b md:border-none border-zinc-200/50 dark:border-white/5 pb-6">
           <div className="flex items-center justify-between pb-3 border-b border-zinc-200/50 dark:border-white/5">
             <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
-              <span className={`w-1.5 h-1.5 rounded-full bg-[#44b3cc] animate-pulse`} />
+              <span className={`w-1.5 h-1.5 rounded-full bg-accent animate-pulse`} />
               Source Input
             </span>
             {inputText && (
@@ -763,7 +763,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
                 className={`p-3 rounded-full hover-scale cursor-pointer transition-all duration-300 shadow-md ${
                   isRecording || isWhisperRecording
                     ? 'bg-red-600 text-white'
-                    : 'bg-[#44b3cc] text-white shadow-lg'
+                    : 'bg-accent text-white shadow-lg'
                 }`}
                 title={isRecording || isWhisperRecording ? 'Stop speech capturing' : 'Start speech capturing'}
               >
@@ -792,7 +792,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
               <div className="space-y-4">
                 <p className="text-base leading-relaxed text-zinc-850 dark:text-zinc-100 text-glow">
                   {displayedTranslatedText}
-                  {isStreaming && <span className={`inline-block w-1.5 h-4 ml-1 bg-[#44b3cc] animate-pulse`} />}
+                  {isStreaming && <span className={`inline-block w-1.5 h-4 ml-1 bg-accent animate-pulse`} />}
                 </p>
 
                 {/* Floating Metric badging inline */}
@@ -849,7 +849,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
                     onClick={() => {
                       alert('Session saved to default workspace project folder!');
                     }}
-                    className="px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider bg-zinc-800/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 hover:border-[#44b3cc]/30 text-zinc-750 dark:text-zinc-300 hover:text-[#44b3cc] cursor-pointer transition-colors"
+                    className="px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider bg-zinc-800/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 hover:border-accent/30 text-zinc-750 dark:text-zinc-300 hover:text-accent cursor-pointer transition-colors"
                   >
                     📁 Save to Project
                   </button>
@@ -859,7 +859,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
                       navigator.clipboard.writeText(translatedText);
                       alert('Translation copied to clipboard!');
                     }}
-                    className="px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider bg-zinc-800/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 hover:border-[#44b3cc]/30 text-zinc-750 dark:text-zinc-300 hover:text-[#44b3cc] cursor-pointer transition-colors"
+                    className="px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider bg-zinc-800/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 hover:border-accent/30 text-zinc-750 dark:text-zinc-300 hover:text-accent cursor-pointer transition-colors"
                   >
                     📋 Copy
                   </button>
@@ -874,7 +874,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
                       step="0.25"
                       value={speechRate}
                       onChange={(e) => setSpeechRate(parseFloat(e.target.value))}
-                      className="w-12 h-1 bg-zinc-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#44b3cc]"
+                      className="w-12 h-1 bg-zinc-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-accent"
                     />
                   </div>
                 </>
@@ -885,7 +885,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
               <button
                 onClick={handleSpeak}
                 className={`p-2.5 rounded-full border hover-scale transition-all ${
-                  isSpeaking ? 'bg-[#44b3cc] border-[#44b3cc] text-white' : 'bg-zinc-800/5 dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-550 dark:text-zinc-400 hover:text-zinc-850 dark:hover:text-zinc-200'
+                  isSpeaking ? 'bg-accent border-accent text-white' : 'bg-zinc-800/5 dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-550 dark:text-zinc-400 hover:text-zinc-850 dark:hover:text-zinc-200'
                 } cursor-pointer`}
                 title="Speak text"
               >
@@ -909,7 +909,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
           >
             <div className="flex items-center justify-between pb-4 border-b border-zinc-200/50 dark:border-white/5">
               <div className="flex items-center gap-2">
-                <HistoryIcon className="w-4 h-4 text-[#2896b2] dark:text-[#44b3cc]" />
+                <HistoryIcon className="w-4 h-4 text-primary dark:text-accent" />
                 <span className="text-xs font-bold uppercase tracking-widest text-zinc-800 dark:text-zinc-200">Timeline Logs</span>
               </div>
               <button
@@ -938,7 +938,7 @@ const TranslatorView: React.FC<TranslatorViewProps> = ({
                   >
                     <div className="flex items-center justify-between text-[9px] font-mono text-zinc-500">
                       <span>{new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      <span className="text-[#2896b2] dark:text-[#44b3cc] uppercase font-bold tracking-wider">
+                      <span className="text-primary dark:text-accent uppercase font-bold tracking-wider">
                         {item.detectedLanguageName ? `${item.detectedLanguageName} → ${item.targetLanguageName}` : `Auto → ${item.targetLanguageName}`}
                       </span>
                     </div>

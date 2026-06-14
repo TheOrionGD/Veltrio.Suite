@@ -753,7 +753,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ data }) 
                           }`}
                         >
                           <span>{formatHeader(col)}</span>
-                          <span className="text-[9px] text-[#44b3cc]">
+                          <span className="text-[9px] text-accent">
                             {isSorted ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}
                           </span>
                         </div>

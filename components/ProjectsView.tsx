@@ -97,7 +97,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ onAskAssistant }) => {
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="px-5 py-2.5 bg-[#44b3cc] hover:bg-[#2896b2] text-white rounded-xl text-xs font-bold transition-all hover-scale cursor-pointer"
+          className="px-5 py-2.5 bg-accent hover:bg-primary text-white rounded-xl text-xs font-bold transition-all hover-scale cursor-pointer"
         >
           + Create Workspace
         </button>
@@ -108,7 +108,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ onAskAssistant }) => {
         {projects.map((proj) => (
           <div
             key={proj.id}
-            className="glass-panel p-6 flex flex-col justify-between space-y-6 hover:border-[#44b3cc]/30 hover:shadow-lg transition-all duration-300"
+            className="glass-panel p-6 flex flex-col justify-between space-y-6 hover:border-accent/30 hover:shadow-lg transition-all duration-300"
           >
             <div className="space-y-2">
               <div className="flex justify-between items-start">
@@ -132,7 +132,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ onAskAssistant }) => {
                 {proj.tags.map((t) => (
                   <span
                     key={t}
-                    className="px-2 py-0.5 rounded-full bg-[#44b3cc]/10 border border-[#44b3cc]/20 text-[9px] font-bold text-[#2896b2] dark:text-[#44b3cc] uppercase"
+                    className="px-2 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-[9px] font-bold text-primary dark:text-accent uppercase"
                   >
                     {t}
                   </span>
@@ -218,7 +218,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ onAskAssistant }) => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#44b3cc] hover:bg-[#2896b2] text-white rounded-xl text-xs font-bold transition-all hover-scale cursor-pointer"
+                  className="px-5 py-2 bg-accent hover:bg-primary text-white rounded-xl text-xs font-bold transition-all hover-scale cursor-pointer"
                 >
                   Create
                 </button>

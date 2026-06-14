@@ -28,7 +28,7 @@ const NotificationsView: React.FC<NotificationsViewProps> = ({
         {notifications.some((n) => !n.read) && (
           <button
             onClick={onMarkAllAsRead}
-            className="px-4 py-2 bg-[#44b3cc]/10 border border-[#44b3cc]/20 text-[#2896b2] dark:text-[#44b3cc] hover:bg-[#44b3cc]/25 rounded-xl text-xs font-bold transition-all hover-scale cursor-pointer"
+            className="px-4 py-2 bg-accent/10 border border-accent/20 text-primary dark:text-accent hover:bg-accent/25 rounded-xl text-xs font-bold transition-all hover-scale cursor-pointer"
           >
             Mark all read
           </button>
@@ -53,8 +53,8 @@ const NotificationsView: React.FC<NotificationsViewProps> = ({
               <div
                 key={item.id}
                 onClick={() => !item.read && onMarkAsRead(item.id)}
-                className={`glass-panel p-5 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:border-[#44b3cc]/30 ${
-                  !item.read ? 'border-l-4 border-l-[#44b3cc]' : 'opacity-75'
+                className={`glass-panel p-5 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:border-accent/30 ${
+                  !item.read ? 'border-l-4 border-l-accent' : 'opacity-75'
                 }`}
               >
                 <div className="flex items-start gap-4 min-w-0">
@@ -69,7 +69,7 @@ const NotificationsView: React.FC<NotificationsViewProps> = ({
                   <div className="min-w-0 space-y-1">
                     <h2 className="text-xs font-bold text-[#234556] dark:text-white flex items-center gap-2">
                       {item.title}
-                      {!item.read && <span className="w-1.5 h-1.5 rounded-full bg-[#44b3cc]" />}
+                      {!item.read && <span className="w-1.5 h-1.5 rounded-full bg-accent" />}
                     </h2>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
                       {item.message}
@@ -86,7 +86,7 @@ const NotificationsView: React.FC<NotificationsViewProps> = ({
                       e.stopPropagation();
                       onDismissNotification(item.id);
                     }}
-                    className="text-zinc-400 hover:text-[#44b3cc] text-xs p-1 cursor-pointer"
+                    className="text-zinc-400 hover:text-accent text-xs p-1 cursor-pointer"
                     title="Dismiss alert"
                   >
                     ✕

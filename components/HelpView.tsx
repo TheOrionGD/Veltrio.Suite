@@ -84,7 +84,7 @@ const HelpView: React.FC = () => {
                   <tr>
                     <td className="py-3 font-semibold text-[#234556] dark:text-white">Switch to Voice Workspace</td>
                     <td className="py-3 font-mono"><kbd className="bg-zinc-850/10 dark:bg-white/10 px-1.5 py-0.5 rounded font-bold">Ctrl+M</kbd></td>
-                    <td className="py-3 font-mono text-[#2896b2] dark:text-[#44b3cc] font-bold">/mode voice</td>
+                    <td className="py-3 font-mono text-primary dark:text-accent font-bold">/mode voice</td>
                   </tr>
                   <tr>
                     <td className="py-3 font-semibold text-[#234556] dark:text-white">Trigger speech recording</td>
@@ -94,7 +94,7 @@ const HelpView: React.FC = () => {
                   <tr>
                     <td className="py-3 font-semibold text-[#234556] dark:text-white">Set Target: Spanish</td>
                     <td className="py-3 text-zinc-500">—</td>
-                    <td className="py-3 font-mono text-[#2896b2] dark:text-[#44b3cc] font-bold">/to es</td>
+                    <td className="py-3 font-mono text-primary dark:text-accent font-bold">/to es</td>
                   </tr>
                 </tbody>
               </table>

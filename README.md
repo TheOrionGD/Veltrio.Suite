@@ -29,6 +29,49 @@
 
 ---
 
+## 🔭 Project Overview
+
+**Project Name:** Veltrio.Suite  
+**Project Type:** Web Application / AI Platform / SaaS  
+**Industry Domain:** Linguistics / Artificial Intelligence / Communication  
+
+Veltrio.Suite is a comprehensive, AI-powered communication hub designed to process, translate, and analyze text in real-time. Moving beyond simple word-to-word translation, it evaluates the sentiment and context of conversations, ensuring the true meaning is never lost. 
+
+---
+
+## 🎯 Target Audience & Purpose
+
+**Target Users:**
+- International Businesses & Teams
+- Multilingual Customer Support Centers
+- Language Learners and Educators
+- Translators and Linguists
+- Content Creators
+
+**Primary Purpose:**
+To eliminate language barriers by providing a scalable, secure, and incredibly intuitive platform that not only translates text but understands the emotional undertone and context, assisted by a ubiquitous AI companion.
+
+---
+
+## 🛠 Technology Stack
+
+### Frontend
+- **React 19.2.0:** Utilizing the latest concurrent rendering features.
+- **Vite 6.2.0:** Ultra-fast hot module replacement and optimized builds.
+- **Tailwind CSS 4.3.0:** Utility-first, highly customizable styling framework.
+- **TypeScript 5.8.2:** Ensuring type safety and exceptional developer experience.
+- **Recharts 3.8.1:** Declarative, high-performance charts for analytics.
+
+### Backend & Database
+- **Node.js APIs:** (Integrated via Vercel/Next.js style API routes or standalone Express server).
+- **MongoDB 7.3.0:** NoSQL database for flexible user data and history management.
+
+### AI Services
+- **Custom AI Engine:** Integrated LLMs for high-fidelity translation and sentiment scoring.
+- **Contextual NLP Pipeline:** Extracts meaning and intent seamlessly.
+
+---
+
 ## 📖 Developer Story
 
 ### Why We Built It
@@ -91,49 +134,6 @@ Security is paramount. We implemented strict CORS policies, environment variable
 17. [Troubleshooting & FAQs](#-troubleshooting--faqs)
 18. [Contributor Information](#-contributor-information)
 19. [License](#-license)
-
----
-
-## 🔭 Project Overview
-
-**Project Name:** Veltrio.Suite  
-**Project Type:** Web Application / AI Platform / SaaS  
-**Industry Domain:** Linguistics / Artificial Intelligence / Communication  
-
-Veltrio.Suite is a comprehensive, AI-powered communication hub designed to process, translate, and analyze text in real-time. Moving beyond simple word-to-word translation, it evaluates the sentiment and context of conversations, ensuring the true meaning is never lost. 
-
----
-
-## 🎯 Target Audience & Purpose
-
-**Target Users:**
-- International Businesses & Teams
-- Multilingual Customer Support Centers
-- Language Learners and Educators
-- Translators and Linguists
-- Content Creators
-
-**Primary Purpose:**
-To eliminate language barriers by providing a scalable, secure, and incredibly intuitive platform that not only translates text but understands the emotional undertone and context, assisted by a ubiquitous AI companion.
-
----
-
-## 🛠 Technology Stack
-
-### Frontend
-- **React 19.2.0:** Utilizing the latest concurrent rendering features.
-- **Vite 6.2.0:** Ultra-fast hot module replacement and optimized builds.
-- **Tailwind CSS 4.3.0:** Utility-first, highly customizable styling framework.
-- **TypeScript 5.8.2:** Ensuring type safety and exceptional developer experience.
-- **Recharts 3.8.1:** Declarative, high-performance charts for analytics.
-
-### Backend & Database
-- **Node.js APIs:** (Integrated via Vercel/Next.js style API routes or standalone Express server).
-- **MongoDB 7.3.0:** NoSQL database for flexible user data and history management.
-
-### AI Services
-- **Custom AI Engine:** Integrated LLMs for high-fidelity translation and sentiment scoring.
-- **Contextual NLP Pipeline:** Extracts meaning and intent seamlessly.
 
 ---
 

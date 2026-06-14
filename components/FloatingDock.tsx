@@ -51,7 +51,7 @@ const FloatingDock: React.FC<FloatingDockProps> = ({
       <>
         <button
           onClick={() => setIsMinimized(false)}
-          className="hidden md:flex fixed bottom-6 left-6 z-50 p-3 bg-gradient-to-br from-[#44b3cc] to-[#2896b2] rounded-full shadow-lg shadow-[#44b3cc]/20 hover:scale-110 cursor-pointer items-center justify-center transition-all duration-300"
+          className="hidden md:flex fixed bottom-6 left-6 z-50 p-3 bg-gradient-to-br from-accent to-primary rounded-full shadow-lg shadow-accent/20 hover:scale-110 cursor-pointer items-center justify-center transition-all duration-300"
           title="Restore Navigation"
         >
           <div className="pulsing-dot" />
@@ -80,7 +80,7 @@ const FloatingDock: React.FC<FloatingDockProps> = ({
       {showUserMenu && currentUser && (
         <div className="mb-3 glass-panel p-4 flex flex-col gap-2.5 min-w-[200px] border border-zinc-200/50 dark:border-white/10 shadow-2xl animate-in fade-in slide-in-from-bottom-3 duration-300">
           <div className="flex items-center gap-2 pb-2 border-b border-zinc-200/50 dark:border-white/5">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#44b3cc] to-[#2896b2] text-white flex items-center justify-center text-xs font-black uppercase shrink-0">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-primary text-white flex items-center justify-center text-xs font-black uppercase shrink-0">
               {currentUser.name ? currentUser.name[0] : 'U'}
             </div>
             <div className="overflow-hidden">
@@ -97,7 +97,7 @@ const FloatingDock: React.FC<FloatingDockProps> = ({
               handleNavClick('profile', true);
               setShowUserMenu(false);
             }}
-            className="w-full text-left py-1 text-[10px] font-bold uppercase tracking-wider text-[#2782a0] dark:text-[#b4e4ed] hover:text-[#44b3cc] cursor-pointer"
+            className="w-full text-left py-1 text-[10px] font-bold uppercase tracking-wider text-purple dark:text-[#b4e4ed] hover:text-accent cursor-pointer"
           >
             👤 Profile Info
           </button>
@@ -111,7 +111,7 @@ const FloatingDock: React.FC<FloatingDockProps> = ({
       )}
 
       {/* Main Glass Navigation Capsule */}
-      <nav className="glass-pill px-6 py-2.5 flex items-center gap-4 border border-zinc-200/55 dark:border-white/15 shadow-xl hover:border-[#44b3cc]/20 transition-all duration-300">
+      <nav className="glass-pill px-6 py-2.5 flex items-center gap-4 border border-zinc-200/55 dark:border-white/15 shadow-xl hover:border-accent/20 transition-all duration-300">
         
         {/* SECTION 1: Primary Communication Channels */}
         <div className="flex items-center gap-1.5 pr-3.5 border-r border-zinc-200/50 dark:border-white/10">
@@ -120,7 +120,7 @@ const FloatingDock: React.FC<FloatingDockProps> = ({
             onClick={() => handleNavClick('translator', false)}
             className={`p-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 hover-scale cursor-pointer ${
               currentPage === 'translator' && !activeOverlay
-                ? 'bg-gradient-to-r from-[#44b3cc]/15 to-[#2896b2]/10 text-[#2896b2] dark:text-[#44b3cc] border border-[#44b3cc]/20'
+                ? 'bg-gradient-to-r from-accent/15 to-primary/10 text-primary dark:text-accent border border-accent/20'
                 : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
             }`}
             title="Written Link (Translator)"
@@ -134,7 +134,7 @@ const FloatingDock: React.FC<FloatingDockProps> = ({
             onClick={() => handleNavClick('conversation', false)}
             className={`p-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 hover-scale cursor-pointer ${
               currentPage === 'conversation' && !activeOverlay
-                ? 'bg-gradient-to-r from-[#44b3cc]/15 to-[#2896b2]/10 text-[#2896b2] dark:text-[#44b3cc] border border-[#44b3cc]/20'
+                ? 'bg-gradient-to-r from-accent/15 to-primary/10 text-primary dark:text-accent border border-accent/20'
                 : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
             }`}
             title="Voice Link (Meeting Room)"
@@ -148,7 +148,7 @@ const FloatingDock: React.FC<FloatingDockProps> = ({
             onClick={() => setIsAssistantOpen(!isAssistantOpen)}
             className={`p-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 hover-scale cursor-pointer ${
               isAssistantOpen
-                ? 'bg-[#44b3cc] text-white shadow-md'
+                ? 'bg-accent text-white shadow-md'
                 : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
             }`}
             title="Toggle Aura AI Copilot"
@@ -164,7 +164,7 @@ const FloatingDock: React.FC<FloatingDockProps> = ({
           <button
             onClick={() => handleNavClick('analytics', true)}
             className={`p-2 rounded-xl text-sm transition-all hover-scale cursor-pointer relative ${
-              activeOverlay === 'analytics' ? 'text-[#44b3cc] scale-110' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-850 dark:hover:text-zinc-200'
+              activeOverlay === 'analytics' ? 'text-accent scale-110' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-850 dark:hover:text-zinc-200'
             }`}
             title="View Realtime Analytics"
           >
@@ -175,7 +175,7 @@ const FloatingDock: React.FC<FloatingDockProps> = ({
           <button
             onClick={() => handleNavClick('files', true)}
             className={`p-2 rounded-xl text-sm transition-all hover-scale cursor-pointer ${
-              activeOverlay === 'files' || activeOverlay === 'projects' ? 'text-[#44b3cc] scale-110' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-850 dark:hover:text-zinc-200'
+              activeOverlay === 'files' || activeOverlay === 'projects' ? 'text-accent scale-110' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-850 dark:hover:text-zinc-200'
             }`}
             title="File Manager & Project Folders"
           >
@@ -186,7 +186,7 @@ const FloatingDock: React.FC<FloatingDockProps> = ({
           <button
             onClick={() => handleNavClick('history', true)}
             className={`p-2 rounded-xl text-sm transition-all hover-scale cursor-pointer ${
-              activeOverlay === 'history' ? 'text-[#44b3cc] scale-110' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-850 dark:hover:text-zinc-200'
+              activeOverlay === 'history' ? 'text-accent scale-110' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-850 dark:hover:text-zinc-200'
             }`}
             title="Workspace Timeline History"
           >
@@ -199,7 +199,7 @@ const FloatingDock: React.FC<FloatingDockProps> = ({
           <button
             onClick={() => handleNavClick('settings', true)}
             className={`p-2 rounded-xl text-sm transition-all hover-scale cursor-pointer ${
-              activeOverlay === 'settings' ? 'text-[#44b3cc] scale-110' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-850 dark:hover:text-zinc-200'
+              activeOverlay === 'settings' ? 'text-accent scale-110' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-850 dark:hover:text-zinc-200'
             }`}
             title="Preferences & Theme Configuration"
           >
@@ -210,15 +210,15 @@ const FloatingDock: React.FC<FloatingDockProps> = ({
           <button
             onClick={() => handleNavClick('notifications', true)}
             className={`p-2 rounded-xl text-sm transition-all hover-scale cursor-pointer relative ${
-              activeOverlay === 'notifications' ? 'text-[#44b3cc] scale-110' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-850 dark:hover:text-zinc-200'
+              activeOverlay === 'notifications' ? 'text-accent scale-110' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-850 dark:hover:text-zinc-200'
             }`}
             title="System Alert Logs"
           >
             <span>🔔</span>
             {unreadNotificationsCount > 0 && (
               <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#44b3cc] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#44b3cc]"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
               </span>
             )}
           </button>
@@ -227,7 +227,7 @@ const FloatingDock: React.FC<FloatingDockProps> = ({
           <button
             onClick={() => handleNavClick('help', true)}
             className={`p-2 rounded-xl text-sm transition-all hover-scale cursor-pointer ${
-              activeOverlay === 'help' ? 'text-[#44b3cc] scale-110' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-850 dark:hover:text-zinc-200'
+              activeOverlay === 'help' ? 'text-accent scale-110' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-850 dark:hover:text-zinc-200'
             }`}
             title="Keyboard Shortcuts & Help"
           >
@@ -253,7 +253,7 @@ const FloatingDock: React.FC<FloatingDockProps> = ({
               className="p-1 rounded-full border border-zinc-200/50 dark:border-white/10 hover-scale cursor-pointer"
               title="Operator Menu"
             >
-              <div className="w-5.5 h-5.5 rounded-full bg-gradient-to-br from-[#44b3cc] to-[#2896b2] text-white flex items-center justify-center text-[9px] font-black uppercase">
+              <div className="w-5.5 h-5.5 rounded-full bg-gradient-to-br from-accent to-primary text-white flex items-center justify-center text-[9px] font-black uppercase">
                 {currentUser.name ? currentUser.name[0] : 'U'}
               </div>
             </button>

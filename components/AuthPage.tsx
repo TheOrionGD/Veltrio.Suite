@@ -7,8 +7,8 @@ interface AuthPageProps {
 const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('veltrio@gmail.com');
-  const [password, setPassword] = useState('veltrio.in');
+  const [email, setEmail] = useState('@gmail.com');
+  const [password, setPassword] = useState('.in');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -56,7 +56,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
           <div className="absolute -inset-10 bg-[radial-gradient(circle_at_center,rgba(68,179,204,0.1),transparent_70%)] pointer-events-none" />
 
           <div className="relative z-10 w-full flex justify-between items-center text-left">
-            <span className="text-[10px] font-black tracking-widest text-[#2782a0] dark:text-[#44b3cc] uppercase">Veltrio Core</span>
+            <span className="text-[10px] font-black tracking-widest text-purple dark:text-accent uppercase">Veltrio Core</span>
             <span className="text-[10px] font-mono text-zinc-500">v0.1.2</span>
           </div>
 
@@ -68,7 +68,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
             {/* The smiling logo visual */}
             <div className="flex items-center justify-center gap-4 py-2">
               <span className="text-5xl font-black font-sans text-[#234556] dark:text-white">w.</span>
-              <div className="w-24 h-24 rounded-full border-4 border-[#2896b2]/30 dark:border-[#44b3cc]/30 flex items-center justify-center bg-transparent relative">
+              <div className="w-24 h-24 rounded-full border-4 border-primary/30 dark:border-accent/30 flex items-center justify-center bg-transparent relative">
                 {/* Smiley face emoji */}
                 <span className="text-5xl animate-bounce">😊</span>
               </div>
@@ -86,7 +86,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
                 setIsRegisterMode(!isRegisterMode);
                 setError('');
               }}
-              className="ml-1.5 font-black text-[#2896b2] dark:text-[#44b3cc] hover:underline cursor-pointer"
+              className="ml-1.5 font-black text-primary dark:text-accent hover:underline cursor-pointer"
             >
               {isRegisterMode ? 'Log in now' : 'Register now'}
             </button>
@@ -147,7 +147,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-[#44b3cc] hover:bg-[#2896b2] text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md hover-scale cursor-pointer disabled:opacity-50 mt-4"
+              className="w-full py-3 bg-accent hover:bg-primary text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md hover-scale cursor-pointer disabled:opacity-50 mt-4"
             >
               {isLoading ? 'Processing credentials...' : isRegisterMode ? 'Register now' : 'Log in now'}
             </button>

@@ -24,6 +24,44 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Dragging state
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, y: 0, startX: 0, startY: 0 });
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (isInline) return;
+    // Don't drag if clicking the close button
+    if ((e.target as HTMLElement).closest('button')) return;
+    
+    e.preventDefault();
+    setIsDragging(true);
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      startX: position.x,
+      startY: position.y
+    };
+    
+    const handlePointerMove = (ev: PointerEvent) => {
+      const dx = ev.clientX - dragStartRef.current.x;
+      const dy = ev.clientY - dragStartRef.current.y;
+      setPosition({
+        x: dragStartRef.current.startX + dx,
+        y: dragStartRef.current.startY + dy
+      });
+    };
+
+    const handlePointerUp = () => {
+      setIsDragging(false);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+  };
+
   // Initialize greeting on load
   useEffect(() => {
     setMessages([
@@ -87,15 +125,30 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
 
   const chatContainerCls = isInline
     ? "h-full w-full flex flex-col bg-surface text-foreground border border-border rounded-2xl text-xs font-sans"
-    : "w-[calc(100vw-2rem)] max-w-[360px] sm:max-w-[400px] h-[500px] max-h-[80vh] bg-surface text-foreground border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden font-sans text-xs z-50";
+    : `w-[calc(100vw-2rem)] max-w-[360px] sm:max-w-[400px] h-[500px] max-h-[80vh] bg-surface text-foreground border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden font-sans text-xs z-50 ${isDragging ? 'shadow-[0_0_40px_rgba(68,179,204,0.3)]' : ''}`;
+
+  const containerStyle = isInline ? {} : { 
+    transform: `translate(${position.x}px, ${position.y}px)`,
+    transition: isDragging ? 'none' : 'transform 0.1s ease-out'
+  };
 
   return (
-    <div className={chatContainerCls}>
+    <div className={chatContainerCls} style={containerStyle}>
       {/* Header */}
-      <div className="bg-surface border-b border-border text-foreground px-5 py-4 flex items-center justify-between shadow-sm flex-shrink-0">
+      <div 
+        className={`bg-surface border-b border-border text-foreground px-5 py-4 flex items-center justify-between shadow-sm flex-shrink-0 ${!isInline ? 'cursor-move select-none' : ''}`}
+        onPointerDown={handlePointerDown}
+      >
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-[#44b3cc] rounded-full animate-ping" />
-          <h3 className="font-extrabold text-[11px] tracking-wider uppercase font-sans">AI Translation Assistant</h3>
+          <div className="w-2 h-2 bg-accent rounded-full animate-ping" />
+          <h3 className="font-extrabold text-[11px] tracking-wider uppercase font-sans">
+            AI Translation Assistant
+            {!isInline && (
+              <span className="text-[9px] text-zinc-400 normal-case tracking-normal ml-2 font-medium">
+                (Hold to drag)
+              </span>
+            )}
+          </h3>
         </div>
         {onClose && (
           <button onClick={onClose} className="text-zinc-400 hover:text-white transition-colors cursor-pointer" aria-label="Close">
@@ -110,7 +163,7 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in duration-200`}>
             <div className={`max-w-[85%] px-4 py-2.5 border text-xs leading-relaxed rounded-2xl shadow-sm ${
               msg.role === 'user'
-                ? 'bg-[#44b3cc] text-white border-[#44b3cc] rounded-br-none'
+                ? 'bg-accent text-white border-accent rounded-br-none'
                 : 'bg-card text-foreground border-border rounded-bl-none'
             }`}>
               <p className="whitespace-pre-wrap">{msg.content}</p>
@@ -121,7 +174,7 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
         {isLoading && (
           <div className="flex justify-start">
             <div className="bg-card text-zinc-400 px-4 py-2.5 border border-border rounded-2xl rounded-bl-none flex items-center gap-2">
-              <SpinnerIcon className="w-4 h-4 animate-spin text-[#44b3cc]" />
+              <SpinnerIcon className="w-4 h-4 animate-spin text-accent" />
               <span className="text-[10px] font-semibold uppercase animate-pulse">AI is thinking...</span>
             </div>
           </div>
@@ -141,13 +194,13 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
         <div className="px-4 pb-2 pt-2 flex flex-wrap gap-2 justify-center flex-shrink-0 bg-transparent border-t border-border font-sans">
           <button
             onClick={() => handleQuickAction("Explain some common metaphors and idioms across different languages.")}
-            className="px-3 py-1.5 rounded-lg border border-border bg-card hover:bg-zinc-800/10 text-[10px] text-[#44b3cc] font-bold transition-all shadow-sm cursor-pointer"
+            className="px-3 py-1.5 rounded-lg border border-border bg-card hover:bg-zinc-800/10 text-[10px] text-accent font-bold transition-all shadow-sm cursor-pointer"
           >
             💡 Idioms Guide
           </button>
           <button
             onClick={() => handleQuickAction("Give me tips for formal versus informal speech when speaking French, German, or Japanese.")}
-            className="px-3 py-1.5 rounded-lg border border-border bg-card hover:bg-zinc-800/10 text-[10px] text-[#44b3cc] font-bold transition-all shadow-sm cursor-pointer"
+            className="px-3 py-1.5 rounded-lg border border-border bg-card hover:bg-zinc-800/10 text-[10px] text-accent font-bold transition-all shadow-sm cursor-pointer"
           >
             🗣️ Speech Registers
           </button>
@@ -162,12 +215,12 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
           onChange={e => setInputValue(e.target.value)}
           placeholder="Ask a question..."
           disabled={isLoading}
-          className="flex-grow px-3 py-2 border border-border bg-card text-foreground rounded-lg text-xs focus:ring-1 focus:ring-[#44b3cc] outline-none placeholder-zinc-500 font-sans"
+          className="flex-grow px-3 py-2 border border-border bg-card text-foreground rounded-lg text-xs focus:ring-1 focus:ring-accent outline-none placeholder-zinc-500 font-sans"
         />
         <button
           type="submit"
           disabled={isLoading || !inputValue.trim()}
-          className="px-4 py-2 bg-[#44b3cc] hover:bg-[#2896b2] text-white rounded-lg text-xs font-bold transition-colors shadow-sm disabled:opacity-50"
+          className="px-4 py-2 bg-accent hover:bg-primary text-white rounded-lg text-xs font-bold transition-colors shadow-sm disabled:opacity-50"
         >
           Send
         </button>

@@ -169,7 +169,7 @@ const FileManagerView: React.FC<FileManagerViewProps> = ({
           {/* Upload Dropzone */}
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-zinc-350 dark:border-white/10 hover:border-[#44b3cc]/60 bg-zinc-800/[0.02] dark:bg-white/[0.02] hover:bg-[#44b3cc]/5 transition-all p-8 rounded-2xl text-center cursor-pointer space-y-3 hover-scale"
+            className="border-2 border-dashed border-zinc-350 dark:border-white/10 hover:border-accent/60 bg-zinc-800/[0.02] dark:bg-white/[0.02] hover:bg-accent/5 transition-all p-8 rounded-2xl text-center cursor-pointer space-y-3 hover-scale"
           >
             <input
               type="file"
@@ -199,7 +199,7 @@ const FileManagerView: React.FC<FileManagerViewProps> = ({
                   <div
                     key={file.id}
                     className={`py-3.5 flex items-center justify-between gap-4 cursor-pointer hover:bg-zinc-800/5 dark:hover:bg-white/[0.02] px-2 rounded-xl transition-all ${
-                      selectedFile?.id === file.id ? 'bg-[#44b3cc]/10 dark:bg-white/5' : ''
+                      selectedFile?.id === file.id ? 'bg-accent/10 dark:bg-white/5' : ''
                     }`}
                     onClick={() => setSelectedFile(file)}
                   >
@@ -220,7 +220,7 @@ const FileManagerView: React.FC<FileManagerViewProps> = ({
                             e.stopPropagation();
                             handleTranslateFile(file.id);
                           }}
-                          className="px-2.5 py-1 bg-zinc-800/10 dark:bg-white/10 hover:bg-[#44b3cc] hover:text-white rounded-lg text-[9px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-300 transition-all cursor-pointer"
+                          className="px-2.5 py-1 bg-zinc-800/10 dark:bg-white/10 hover:bg-accent hover:text-white rounded-lg text-[9px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-300 transition-all cursor-pointer"
                         >
                           Translate
                         </button>
@@ -279,8 +279,8 @@ const FileManagerView: React.FC<FileManagerViewProps> = ({
 
                 {selectedFile.translatedContent && (
                   <div className="space-y-1">
-                    <div className="text-[9px] uppercase tracking-wider font-bold text-[#44b3cc]">Translated Content</div>
-                    <div className="p-3 bg-[#44b3cc]/5 dark:bg-white/[0.02] border border-[#44b3cc]/20 rounded-xl text-[11px] font-sans text-zinc-700 dark:text-zinc-200 max-h-[140px] overflow-y-auto leading-relaxed">
+                    <div className="text-[9px] uppercase tracking-wider font-bold text-accent">Translated Content</div>
+                    <div className="p-3 bg-accent/5 dark:bg-white/[0.02] border border-accent/20 rounded-xl text-[11px] font-sans text-zinc-700 dark:text-zinc-200 max-h-[140px] overflow-y-auto leading-relaxed">
                       {selectedFile.translatedContent}
                     </div>
                   </div>
@@ -289,7 +289,7 @@ const FileManagerView: React.FC<FileManagerViewProps> = ({
                 <div className="flex flex-col gap-2 pt-3 border-t border-zinc-200/40 dark:border-white/5">
                   <button
                     onClick={() => handleSendToWorkspace(selectedFile.content)}
-                    className="w-full text-center py-2 bg-[#44b3cc] hover:bg-[#2896b2] text-white rounded-xl text-xs font-bold transition-all hover-scale cursor-pointer"
+                    className="w-full text-center py-2 bg-accent hover:bg-primary text-white rounded-xl text-xs font-bold transition-all hover-scale cursor-pointer"
                   >
                     Open in Written Link
                   </button>

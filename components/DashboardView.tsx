@@ -37,7 +37,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({
             Real-time Translation Hub · Interactive NLP Dashboard
           </p>
         </div>
-        <div className="flex items-center gap-3 bg-zinc-800/5 dark:bg-white/5 px-4 py-2 border border-zinc-200/40 dark:border-white/5 rounded-xl font-mono text-[10px] tracking-wider text-[#2782a0] dark:text-[#b4e4ed]">
+        <div className="flex items-center gap-3 bg-zinc-800/5 dark:bg-white/5 px-4 py-2 border border-zinc-200/40 dark:border-white/5 rounded-xl font-mono text-[10px] tracking-wider text-purple dark:text-[#b4e4ed]">
           <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
           SYSTEM METRICS LOGGED: ACTIVE
         </div>
@@ -46,13 +46,13 @@ const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Grid statistics metrics with pure SVG sparklines */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Stat 1 */}
-        <div className="glass-panel p-5 flex flex-col justify-between space-y-4 hover:border-[#44b3cc]/35 transition-colors duration-300">
+        <div className="glass-panel p-5 flex flex-col justify-between space-y-4 hover:border-accent/35 transition-colors duration-300">
           <div>
             <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 dark:text-zinc-500">Timeline Events</span>
             <div className="text-3xl font-black text-[#234556] dark:text-[#effbfc] mt-1">{history.length}</div>
           </div>
           <div className="h-10 w-full">
-            <svg viewBox="0 0 100 30" className="w-full h-full text-[#44b3cc]" preserveAspectRatio="none">
+            <svg viewBox="0 0 100 30" className="w-full h-full text-accent" preserveAspectRatio="none">
               <path
                 d="M0,25 Q15,5 30,20 T60,10 T80,18 T100,5"
                 fill="none"
@@ -65,7 +65,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Stat 2 */}
-        <div className="glass-panel p-5 flex flex-col justify-between space-y-4 hover:border-[#44b3cc]/35 transition-colors duration-300">
+        <div className="glass-panel p-5 flex flex-col justify-between space-y-4 hover:border-accent/35 transition-colors duration-300">
           <div>
             <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 dark:text-zinc-500">Language Pairs</span>
             <div className="text-3xl font-black text-[#234556] dark:text-[#effbfc] mt-1">
@@ -73,7 +73,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
           <div className="h-10 w-full">
-            <svg viewBox="0 0 100 30" className="w-full h-full text-[#2896b2]" preserveAspectRatio="none">
+            <svg viewBox="0 0 100 30" className="w-full h-full text-primary" preserveAspectRatio="none">
               <path
                 d="M0,20 Q20,15 40,25 T80,5 T100,15"
                 fill="none"
@@ -86,7 +86,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Stat 3 */}
-        <div className="glass-panel p-5 flex flex-col justify-between space-y-4 hover:border-[#44b3cc]/35 transition-colors duration-300">
+        <div className="glass-panel p-5 flex flex-col justify-between space-y-4 hover:border-accent/35 transition-colors duration-300">
           <div>
             <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 dark:text-zinc-500">Sentences Valency</span>
             <div className="text-3xl font-black text-[#234556] dark:text-[#effbfc] mt-1">{sentimentPct}% Pos.</div>
@@ -105,7 +105,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Stat 4 */}
-        <div className="glass-panel p-5 flex flex-col justify-between space-y-4 hover:border-[#44b3cc]/35 transition-colors duration-300">
+        <div className="glass-panel p-5 flex flex-col justify-between space-y-4 hover:border-accent/35 transition-colors duration-300">
           <div>
             <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 dark:text-zinc-500">Character Weight</span>
             <div className="text-3xl font-black text-[#234556] dark:text-[#effbfc] mt-1">{totalCharacters} char</div>
@@ -135,19 +135,19 @@ const DashboardView: React.FC<DashboardViewProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
                 onClick={() => setCurrentPage('translator')}
-                className="p-4 rounded-xl text-left bg-gradient-to-br from-[#44b3cc]/5 to-[#2896b2]/10 border border-zinc-200 dark:border-white/10 hover-scale cursor-pointer group"
+                className="p-4 rounded-xl text-left bg-gradient-to-br from-accent/5 to-primary/10 border border-zinc-200 dark:border-white/10 hover-scale cursor-pointer group"
               >
                 <div className="text-lg mb-1">📝</div>
-                <div className="text-xs font-bold text-[#234556] dark:text-white group-hover:text-[#44b3cc] transition-colors">Launch Written Translator</div>
+                <div className="text-xs font-bold text-[#234556] dark:text-white group-hover:text-accent transition-colors">Launch Written Translator</div>
                 <div className="text-[10px] text-zinc-500 mt-1">Translate documents or structured text side-by-side.</div>
               </button>
 
               <button
                 onClick={() => setCurrentPage('conversation')}
-                className="p-4 rounded-xl text-left bg-gradient-to-br from-[#44b3cc]/5 to-[#2896b2]/10 border border-zinc-200 dark:border-white/10 hover-scale cursor-pointer group"
+                className="p-4 rounded-xl text-left bg-gradient-to-br from-accent/5 to-primary/10 border border-zinc-200 dark:border-white/10 hover-scale cursor-pointer group"
               >
                 <div className="text-lg mb-1">🎙️</div>
-                <div className="text-xs font-bold text-[#234556] dark:text-white group-hover:text-[#44b3cc] transition-colors">Launch Voice Link</div>
+                <div className="text-xs font-bold text-[#234556] dark:text-white group-hover:text-accent transition-colors">Launch Voice Link</div>
                 <div className="text-[10px] text-zinc-500 mt-1">Real-time bilingual meeting speech translation.</div>
               </button>
             </div>
@@ -194,7 +194,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({
                       setInputText(item.inputText);
                       setCurrentPage('translator');
                     }}
-                    className="p-3 bg-zinc-800/5 dark:bg-white/5 hover:bg-[#44b3cc]/10 border border-zinc-200/40 dark:border-white/5 rounded-xl transition-all cursor-pointer space-y-1 hover-scale"
+                    className="p-3 bg-zinc-800/5 dark:bg-white/5 hover:bg-accent/10 border border-zinc-200/40 dark:border-white/5 rounded-xl transition-all cursor-pointer space-y-1 hover-scale"
                   >
                     <div className="flex justify-between items-center text-[9px] font-mono text-zinc-400">
                       <span>Auto → {item.targetLanguageName}</span>
@@ -209,7 +209,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({
             {history.length > 0 && (
               <button
                 onClick={() => setCurrentPage('history')}
-                className="w-full text-center text-xs font-bold text-[#2896b2] hover:text-[#44b3cc] mt-2 block cursor-pointer"
+                className="w-full text-center text-xs font-bold text-primary hover:text-accent mt-2 block cursor-pointer"
               >
                 View full history ➔
               </button>
@@ -217,10 +217,10 @@ const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
 
           {/* AI Advisor Panel */}
-          <div className="glass-panel p-6 bg-gradient-to-br from-[#44b3cc]/5 via-[#2896b2]/10 to-transparent space-y-4">
+          <div className="glass-panel p-6 bg-gradient-to-br from-accent/5 via-primary/10 to-transparent space-y-4">
             <div className="flex items-center gap-2">
               <span className="text-lg">✨</span>
-              <h2 className="text-xs font-black uppercase tracking-widest text-[#2896b2] dark:text-[#44b3cc]">
+              <h2 className="text-xs font-black uppercase tracking-widest text-primary dark:text-accent">
                 Aura Copilot
               </h2>
             </div>
@@ -229,7 +229,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({
             </p>
             <button
               onClick={() => onAskAssistant("What are some helpful tips to optimize translation style mode in Veltrio?")}
-              className="w-full text-center py-2 bg-[#44b3cc] hover:bg-[#2896b2] text-white rounded-xl text-xs font-bold transition-all hover-scale cursor-pointer"
+              className="w-full text-center py-2 bg-accent hover:bg-primary text-white rounded-xl text-xs font-bold transition-all hover-scale cursor-pointer"
             >
               Ask Copilot Tips
             </button>

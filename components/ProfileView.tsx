@@ -1091,7 +1091,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onProfileUpdate,
                         <span className="text-[8px] uppercase tracking-wider font-extrabold text-muted block">
                           System Plan Class
                         </span>
-                        <span className="text-xs font-black text-foreground uppercase tracking-widest text-[#44b3cc]" style={{ color: 'var(--accent)' }}>
+                        <span className="text-xs font-black text-foreground uppercase tracking-widest text-accent" style={{ color: 'var(--accent)' }}>
                           {profile.accountType} License
                         </span>
                       </div>

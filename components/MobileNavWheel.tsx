@@ -304,8 +304,8 @@ const MobileNavWheel: React.FC<MobileNavWheelProps> = ({
               <span className="select-none pointer-events-none">{item.icon}</span>
               {item.id === 'notifications' && unreadNotificationsCount > 0 && (
                 <span className="absolute top-1 right-1 flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#44b3cc] opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#44b3cc]"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
                 </span>
               )}
             </button>
@@ -314,7 +314,7 @@ const MobileNavWheel: React.FC<MobileNavWheelProps> = ({
       </div>
       
       {/* Floating dynamic label for selection indicator */}
-      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] font-black uppercase tracking-[0.25em] text-[#2896b2] dark:text-[#44b3cc] pointer-events-none">
+      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] font-black uppercase tracking-[0.25em] text-primary dark:text-accent pointer-events-none">
         {WHEEL_ITEMS[activeIndex]?.label}
       </div>
     </div>
