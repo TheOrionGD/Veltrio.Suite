@@ -1,4 +1,4 @@
-import { connectToDatabase, getDb, runInTransaction } from '../services/db';
+import { connectToDatabase, getDb, runInTransaction } from '../services/db.js';
 
 let isDbConnected = false;
 
